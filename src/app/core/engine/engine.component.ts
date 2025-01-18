@@ -3,8 +3,8 @@ import * as THREE from 'three';
 import WebGL from 'three/addons/capabilities/WebGL.js';
 import { MapControls, OrbitControls } from 'three/examples/jsm/Addons.js';
 import { CameraService } from './controls/camera.service';
-import vertexShader from './shaders/vertexShader.glsl'
-import fragmentShader from './shaders/fragmentShader.glsl'
+import { GeometryService } from './geometry/geometry.service';
+import { MaterialService } from './material/material.service';
 
 
 @Component({
@@ -14,10 +14,11 @@ import fragmentShader from './shaders/fragmentShader.glsl'
   templateUrl: './engine.component.html',
 })
 export class EngineComponent implements AfterViewInit {
+  // implemented using https://github.com/JohnnyDevNull/ng-three-template
 
   cameraService = inject(CameraService)
-
-  // implemented using https://github.com/JohnnyDevNull/ng-three-template
+  geometryService = inject(GeometryService)
+  materialService = inject(MaterialService)
 
   public mainCanvas = viewChild.required<ElementRef>('mainCanvas')
 
@@ -28,9 +29,7 @@ export class EngineComponent implements AfterViewInit {
   private renderer!: THREE.WebGLRenderer
   private canvas!: HTMLCanvasElement
   private light!: THREE.AmbientLight
-  private cube: THREE.Mesh;
   private controls!: MapControls
-
   private frameId = 0
 
   constructor(private ngZone: NgZone) {
@@ -71,18 +70,11 @@ export class EngineComponent implements AfterViewInit {
     // register new light
     this.scene.add(this.light)
 
+    // prepare material
+    this.prepareMaterial()
 
-    // TODO: add geometry loader
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-
-    const material = new THREE.ShaderMaterial({
-      vertexShader: vertexShader,
-      fragmentShader: fragmentShader,
-    });
-
-
-    this.cube = new THREE.Mesh(geometry, material);
-    this.scene.add(this.cube);
+    // simple geometry loader
+    this.prepareGeometry()
   }
 
 
@@ -112,6 +104,7 @@ export class EngineComponent implements AfterViewInit {
       this.render();
     });
 
+    this.renderer.localClippingEnabled = true;
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -165,6 +158,16 @@ export class EngineComponent implements AfterViewInit {
     this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000)
     this.camera.position.z = 5
     return this.camera
+  }
+
+  prepareGeometry(){
+    this.geometryService.initGeometry()
+    this.geometryService.geometry.forEach(geometry => this.scene.add(geometry))
+    this.geometryService.slicers.forEach(slicer => this.scene.add(slicer))
+  }
+
+  prepareMaterial(){
+    this.materialService.initMaterial(new THREE.Vector4(0, 0, 1, 0))
   }
 
 }

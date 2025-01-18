@@ -3,6 +3,15 @@
 
 // https://www.youtube.com/watch?v=oKbCaj1J6EI&t=3s
 // shader tutorial
+
+// https://stackoverflow.com/questions/16522897/how-to-cut-an-object-using-webgl-shaders
+// https://thebookofshaders.com
+
+varying vec3 vPosition;	
+
 void main() {
-	gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+
+	vPosition = position;
+
+	gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
