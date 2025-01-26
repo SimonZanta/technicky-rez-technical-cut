@@ -5,6 +5,7 @@ import { MapControls, OrbitControls } from 'three/examples/jsm/Addons.js';
 import { CameraService } from '../../../core/services/camera.service';
 import { GeometryService } from '../service/geometry.service';
 import { MaterialService } from '../service/material.service';
+import {SlicerService} from "../../slicer/service/slicer.service";
 
 
 @Component({
@@ -19,6 +20,7 @@ export class EngineComponent implements AfterViewInit {
   cameraService = inject(CameraService)
   geometryService = inject(GeometryService)
   materialService = inject(MaterialService)
+  slicerService = inject(SlicerService)
 
   public mainCanvas = viewChild.required<ElementRef>('mainCanvas')
 
@@ -69,6 +71,9 @@ export class EngineComponent implements AfterViewInit {
 
     // register new light
     this.scene.add(this.light)
+
+    // simple slicer loader
+    this.prepareSlicers()
 
     // prepare material
     this.prepareMaterial()
@@ -163,11 +168,15 @@ export class EngineComponent implements AfterViewInit {
   prepareGeometry(){
     this.geometryService.initGeometry()
     this.geometryService.geometry.forEach(geometry => this.scene.add(geometry))
-    this.geometryService.slicers.forEach(slicer => this.scene.add(slicer))
+  }
+
+  prepareSlicers(){
+    this.slicerService.initSlicers()
+    this.slicerService.slicers.forEach(slicer => this.scene.add(slicer))
   }
 
   prepareMaterial(){
-    this.materialService.initMaterial(new THREE.Vector4(0, 0, 1, 0))
+    this.materialService.initMaterial(this.slicerService.slicerPlane)
   }
 
 }
