@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { EngineComponent } from "./core/engine/engine.component";
-import { SliceIncrementerComponent } from "./core/ui/slice-incrementer/slice-incrementer.component";
+import { EngineComponent } from "./features/engine/component/engine.component";
+import { SliceIncrementerComponent } from "./shared/components/slice-incrementer/slice-incrementer.component";
 
 @Component({
   selector: 'app-root',

@@ -2,9 +2,9 @@ import { AfterViewInit, Component, ElementRef, inject, NgZone, viewChild } from 
 import * as THREE from 'three';
 import WebGL from 'three/addons/capabilities/WebGL.js';
 import { MapControls, OrbitControls } from 'three/examples/jsm/Addons.js';
-import { CameraService } from './controls/camera.service';
-import { GeometryService } from './geometry/geometry.service';
-import { MaterialService } from './material/material.service';
+import { CameraService } from '../../../core/services/camera.service';
+import { GeometryService } from '../service/geometry.service';
+import { MaterialService } from '../service/material.service';
 
 
 @Component({
@@ -54,7 +54,7 @@ export class EngineComponent implements AfterViewInit {
 
     // prepare scene
     this.prepareScene()
-    
+
     // prepare camera
     this.preparePerspectiveCamera()
 
@@ -133,7 +133,7 @@ export class EngineComponent implements AfterViewInit {
   protected prepareControls() {
     // https://threejs.org/docs/#examples/en/controls/OrbitControls.update
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
-    this.controls.mouseButtons = {LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.ROTATE, RIGHT: THREE.MOUSE.DOLLY}    
+    this.controls.mouseButtons = {LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.ROTATE, RIGHT: THREE.MOUSE.DOLLY}
     this.controls.minDistance = 0.1;
     this.controls.maxDistance = 1000;
     this.controls.maxPolarAngle = Math.PI / 2;
