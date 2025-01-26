@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import * as THREE from 'three';
 import { BufferGeometry } from 'three';
-import { SlicerService } from '../slicer/slicer.service';
-import { MaterialService } from '../material/material.service';
+import { SlicerService } from '../../slicer/service/slicer.service';
+import { MaterialService } from './material.service';
 
 @Injectable({
   providedIn: 'root'
@@ -45,7 +45,7 @@ export class GeometryService {
     if(slicer){
       slicer.position.set(position.x, position.y, position.z);
     }
-    
+
     this.materialService.updateMaterial(position, this.geometry);
   }
 }

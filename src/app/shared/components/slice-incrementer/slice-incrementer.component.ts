@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { MatSliderModule } from '@angular/material/slider';
-import { GeometryService } from '../../engine/geometry/geometry.service';
+import { GeometryService } from '../../../features/engine/service/geometry.service';
 import * as THREE from 'three';
 
 @Component({
@@ -16,7 +16,7 @@ export class SliceIncrementerComponent {
 
   slice = signal<number>(0.0);
   lastPos = signal<number>(0.0);
-  
+
 
   updateSlice(event: any) {
     const oldPos = this.geometryService.slicers.at(0)?.position;

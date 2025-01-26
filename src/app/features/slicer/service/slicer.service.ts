@@ -18,6 +18,8 @@ export class SlicerService {
     return new THREE.Vector4(normal.x, normal.y, normal.z, d);
   }
 
+  g
+
   // createSlicerGeometry(position?: THREE.Vector3){
   //   const slicePlane = this.setSlicePlane(position ?? new THREE.Vector3(0, 0, 0))
 
