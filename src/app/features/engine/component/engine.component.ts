@@ -1,10 +1,13 @@
 import { AfterViewInit, Component, ElementRef, inject, NgZone, viewChild } from '@angular/core';
 import * as THREE from 'three';
 import WebGL from 'three/addons/capabilities/WebGL.js';
-import { MapControls, OrbitControls } from 'three/examples/jsm/Addons.js';
+import { GeometryCompressionUtils, MapControls, OrbitControls } from 'three/examples/jsm/Addons.js';
 import { CameraService } from '../../../core/services/camera.service';
 import { GeometryService } from '../service/geometry.service';
 import { MaterialService } from '../service/material.service';
+import { SlicerService } from "../../slicer/service/slicer.service";
+import { BVHGeomTest } from '../service/BVHGeomTest.service';
+import { BVHGeometryService } from '../service/BVHGeometry.service';
 
 
 @Component({
@@ -19,13 +22,14 @@ export class EngineComponent implements AfterViewInit {
   cameraService = inject(CameraService)
   geometryService = inject(GeometryService)
   materialService = inject(MaterialService)
+  slicerService = inject(SlicerService)
+  bvhGeomTest = inject(BVHGeomTest)
+  bvhGeometryService = inject(BVHGeometryService)
 
   public mainCanvas = viewChild.required<ElementRef>('mainCanvas')
-
-
+  public camera!: THREE.PerspectiveCamera | THREE.OrthographicCamera
   // exclamation mark mean no null assertion for TS
   private scene!: THREE.Scene
-  public camera!: THREE.PerspectiveCamera | THREE.OrthographicCamera
   private renderer!: THREE.WebGLRenderer
   private canvas!: HTMLCanvasElement
   private light!: THREE.AmbientLight
@@ -44,39 +48,6 @@ export class EngineComponent implements AfterViewInit {
       console.log(warning)
     }
   }
-
-  protected initScene() {
-    // set canvas
-    this.canvas = this.getCanvas()
-
-    // set renderer
-    this.prepareRenderer()
-
-    // prepare scene
-    this.prepareScene()
-
-    // prepare camera
-    this.preparePerspectiveCamera()
-
-    // register camera
-    this.scene.add(this.camera)
-
-    // prepare controls
-    this.prepareControls()
-
-    // init initial ambient light
-    this.prepareLight()
-
-    // register new light
-    this.scene.add(this.light)
-
-    // prepare material
-    this.prepareMaterial()
-
-    // simple geometry loader
-    this.prepareGeometry()
-  }
-
 
   // TODO refactor
   public animate(): void {
@@ -104,12 +75,54 @@ export class EngineComponent implements AfterViewInit {
       this.render();
     });
 
+    //  // Animate clip plane
+    //  const time = Date.now() * 0.001;
+    //  this.bvhGeomTest.updateClipPlane(
+    //      new THREE.Vector3(Math.sin(time), Math.cos(time), 0),
+    //      0
+    //  );
+
+
     this.renderer.localClippingEnabled = true;
     this.renderer.render(this.scene, this.camera);
   }
 
-// TODO end of refactor
+  protected initScene() {
+    // set canvas
+    this.canvas = this.getCanvas()
 
+    // set renderer
+    this.prepareRenderer()
+
+    // prepare scene
+    this.prepareScene()
+
+    // prepare camera
+    this.preparePerspectiveCamera()
+
+    // register camera
+    this.scene.add(this.camera)
+
+    // prepare controls
+    this.prepareControls()
+
+    // init initial ambient light
+    this.prepareLight()
+
+    // register new light
+    this.scene.add(this.light)
+
+    this.prepareSlicers()
+
+    // prepare material
+    this.prepareMaterial()
+
+    // simple geometry loader
+    this.prepareGeometry()
+
+    // this.prepareBVHGeometry()
+    // this.prepareTestBVH()
+  }
 
   protected getCanvas() {
     return this.mainCanvas().nativeElement
@@ -120,9 +133,13 @@ export class EngineComponent implements AfterViewInit {
       canvas: this.canvas,
       alpha: true, // sets transparency
       antialias: true, // sets antialiasing
+      stencil: true // sets stencil buffer
     })
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+    // enable clipping using clipping planes
+    this.renderer.localClippingEnabled = true;
   }
 
   protected prepareScene() {
@@ -133,7 +150,7 @@ export class EngineComponent implements AfterViewInit {
   protected prepareControls() {
     // https://threejs.org/docs/#examples/en/controls/OrbitControls.update
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
-    this.controls.mouseButtons = {LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.ROTATE, RIGHT: THREE.MOUSE.DOLLY}
+    this.controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.ROTATE, RIGHT: THREE.MOUSE.DOLLY }
     this.controls.minDistance = 0.1;
     this.controls.maxDistance = 1000;
     this.controls.maxPolarAngle = Math.PI / 2;
@@ -154,20 +171,36 @@ export class EngineComponent implements AfterViewInit {
     return this.camera
   }
 
+  // TODO end of refactor
+
   public prepareOrthographicCamera(): THREE.OrthographicCamera {
     this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000)
     this.camera.position.z = 5
     return this.camera
   }
 
-  prepareGeometry(){
+  prepareGeometry() {
     this.geometryService.initGeometry()
-    this.geometryService.geometry.forEach(geometry => this.scene.add(geometry))
-    this.geometryService.slicers.forEach(slicer => this.scene.add(slicer))
+    this.geometryService.geometry.forEach(geometry => {
+      const geomBVH = this.bvhGeometryService.getGeometryBVH(geometry)
+      this.scene.add(geomBVH.model, geomBVH.cap)
+    })
+
+    this.geometryService.slicerGeometries.forEach(slicer => this.scene.add(slicer))
   }
 
-  prepareMaterial(){
+  prepareMaterial() {
     this.materialService.initMaterial(new THREE.Vector4(0, 0, 1, 0))
+  }
+
+  prepareSlicers() {
+    this.slicerService.initSlicerPlanes()
+    this.bvhGeometryService.init(this.slicerService.getSlicerPlaneForSlicing())
+  }
+
+  prepareTestBVH() {
+    this.bvhGeomTest.init()
+    this.scene.add(this.bvhGeomTest.frontModel, this.bvhGeomTest.backModel)
   }
 
 }
