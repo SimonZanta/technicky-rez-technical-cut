@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import * as THREE from 'three';
 
 @Injectable({
@@ -23,7 +23,7 @@ export class SlicerService {
     const normal = new THREE.Vector3(0, 0, 1);
     const d = -normal.dot(position ?? new THREE.Vector3(0, 0, 0));
 
-    return {normalX: normal.x, normalY: normal.y, normalZ: normal.z, d}
+    return { normalX: normal.x, normalY: normal.y, normalZ: normal.z, d }
   }
 
   setSlicerPlanePosition(slicerPlane: THREE.Plane, position: THREE.Vector3) {
@@ -31,15 +31,19 @@ export class SlicerService {
     this.slicerPlane!.set(new THREE.Vector3(planeVector.normalX, planeVector.normalY, planeVector.normalZ), planeVector.d)
   }
 
-  getSlicerPlaneForSlicing(): THREE.Plane{
+  getSlicerPlaneForSlicing(): THREE.Plane {
 
     const plane = this.slicerPlane
-    if(plane === undefined) throw Error('plane is undefined')
+    if (plane === undefined) throw Error('plane is undefined')
 
     return plane
   }
 
-  getSlicerAsVector(): THREE.Vector4{
-    return new THREE.Vector4(this.slicerPlane.normal.x, this.slicerPlane.normal.y, this.slicerPlane.normal.z, this.slicerPlane.constant)
+  getSlicerAsVector(plane?: THREE.Plane): THREE.Vector4 {
+    const currentPlane = plane ?? this.slicerPlane
+
+    if (!currentPlane) throw Error('no plane to return as vector')
+
+    return new THREE.Vector4(currentPlane.normal.x, currentPlane.normal.y, currentPlane.normal.z, currentPlane.constant)
   }
 }

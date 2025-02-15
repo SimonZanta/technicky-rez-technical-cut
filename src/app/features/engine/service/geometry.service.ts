@@ -1,8 +1,9 @@
-import {inject, Injectable} from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import * as THREE from 'three';
-import {BufferGeometry} from 'three';
-import {SlicerService} from '../../slicer/service/slicer.service';
-import {MaterialService} from './material.service';
+import { BufferGeometry } from 'three';
+import { SlicerService } from '../../slicer/service/slicer.service';
+import { MaterialService } from './material.service';
+import { BVHGeometryService } from './BVHGeometry.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +11,7 @@ import {MaterialService} from './material.service';
 export class GeometryService {
   slicerService = inject(SlicerService);
   materialService = inject(MaterialService);
+  bvhGeometryService = inject(BVHGeometryService)
 
   public readonly geometry: THREE.BufferGeometry[] = [];
   public readonly slicerGeometries: THREE.Mesh[] = [];
@@ -19,13 +21,18 @@ export class GeometryService {
     this.createSlicerGeometry(new THREE.PlaneGeometry(0.2, 0.2))
 
     this.materialService.initMaterial(new THREE.Vector4(0, 0, 1, 0))
-    this.createObjectGeometry(new THREE.BoxGeometry(1, 1, 1))
+    // const points = [];
+    // for (let i = 0; i < 10; i++) {
+    //   points.push(new THREE.Vector2(Math.sin(i * 0.2) * 10 + 5, (i - 5) * 2));
+    // }
+    // this.createObjectGeometry(new THREE.LatheGeometry(points))
+    this.createObjectGeometry(new THREE.SphereGeometry(1))
+    // this.createObjectGeometry(new THREE.BoxGeometry(1, 1, 1))
     // this.createObjectGeometry(new THREE.BoxGeometry(0.5, 0.5, 0.5))
   }
 
   createObjectGeometry(object: BufferGeometry) {
     const geometry = object;
-    // const mesh = new THREE.Mesh(geometry, this.materialService.material());
     this.geometry.push(geometry);
   }
 
@@ -46,6 +53,7 @@ export class GeometryService {
     if (slicer && slicerPlane) {
       slicer.position.set(position.x, position.y, position.z);
       this.slicerService.setSlicerPlanePosition(slicerPlane, position)
+      this.bvhGeometryService.updateClipPlane(slicerPlane)
     }
   }
 }

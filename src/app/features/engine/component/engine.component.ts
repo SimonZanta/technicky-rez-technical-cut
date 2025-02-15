@@ -1,11 +1,11 @@
-import {AfterViewInit, Component, ElementRef, inject, NgZone, viewChild} from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, NgZone, viewChild } from '@angular/core';
 import * as THREE from 'three';
 import WebGL from 'three/addons/capabilities/WebGL.js';
-import {GeometryCompressionUtils, MapControls, OrbitControls} from 'three/examples/jsm/Addons.js';
-import {CameraService} from '../../../core/services/camera.service';
-import {GeometryService} from '../service/geometry.service';
-import {MaterialService} from '../service/material.service';
-import {SlicerService} from "../../slicer/service/slicer.service";
+import { GeometryCompressionUtils, MapControls, OrbitControls } from 'three/examples/jsm/Addons.js';
+import { CameraService } from '../../../core/services/camera.service';
+import { GeometryService } from '../service/geometry.service';
+import { MaterialService } from '../service/material.service';
+import { SlicerService } from "../../slicer/service/slicer.service";
 import { BVHGeomTest } from '../service/BVHGeomTest.service';
 import { BVHGeometryService } from '../service/BVHGeometry.service';
 
@@ -119,7 +119,7 @@ export class EngineComponent implements AfterViewInit {
 
     // simple geometry loader
     this.prepareGeometry()
- 
+
     // this.prepareBVHGeometry()
     // this.prepareTestBVH()
   }
@@ -150,7 +150,7 @@ export class EngineComponent implements AfterViewInit {
   protected prepareControls() {
     // https://threejs.org/docs/#examples/en/controls/OrbitControls.update
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
-    this.controls.mouseButtons = {LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.ROTATE, RIGHT: THREE.MOUSE.DOLLY}
+    this.controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.ROTATE, RIGHT: THREE.MOUSE.DOLLY }
     this.controls.minDistance = 0.1;
     this.controls.maxDistance = 1000;
     this.controls.maxPolarAngle = Math.PI / 2;
@@ -171,7 +171,7 @@ export class EngineComponent implements AfterViewInit {
     return this.camera
   }
 
-// TODO end of refactor
+  // TODO end of refactor
 
   public prepareOrthographicCamera(): THREE.OrthographicCamera {
     this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000)
@@ -198,14 +198,9 @@ export class EngineComponent implements AfterViewInit {
     this.bvhGeometryService.init(this.slicerService.getSlicerPlaneForSlicing())
   }
 
-  prepareTestBVH(){
+  prepareTestBVH() {
     this.bvhGeomTest.init()
     this.scene.add(this.bvhGeomTest.frontModel, this.bvhGeomTest.backModel)
-  }
-
-  prepareBVHGeometry(){
-
-    this.bvhGeometryService.updateClipPlaneForGeometries()
   }
 
 }
