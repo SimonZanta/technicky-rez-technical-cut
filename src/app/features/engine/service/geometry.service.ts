@@ -21,14 +21,8 @@ export class GeometryService {
     this.createSlicerGeometry(new THREE.PlaneGeometry(0.2, 0.2))
 
     this.materialService.initMaterial(new THREE.Vector4(0, 0, 1, 0))
-    // const points = [];
-    // for (let i = 0; i < 10; i++) {
-    //   points.push(new THREE.Vector2(Math.sin(i * 0.2) * 10 + 5, (i - 5) * 2));
-    // }
-    // this.createObjectGeometry(new THREE.LatheGeometry(points))
-    this.createObjectGeometry(new THREE.SphereGeometry(1))
-    // this.createObjectGeometry(new THREE.BoxGeometry(1, 1, 1))
-    // this.createObjectGeometry(new THREE.BoxGeometry(0.5, 0.5, 0.5))
+    // this.createObjectGeometry(new THREE.SphereGeometry(1))
+    this.createObjectGeometry(new THREE.BoxGeometry(1, 1, 1))
   }
 
   createObjectGeometry(object: BufferGeometry) {

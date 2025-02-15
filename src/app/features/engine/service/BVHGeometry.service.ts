@@ -23,8 +23,10 @@ export class BVHGeometryService {
     vertexShader: standartMeshMaterialVertex,
     fragmentShader: standartMeshMaterialFragment,
     uniforms: {
+      u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
       clippingPlane: { value: null },
-      u_color: { value: new THREE.Color(0xff00ff) }
+      u_color: { value: new THREE.Color(0xff00ff) },
+      hasLines: { value: 0. }
     },
     side: THREE.FrontSide,
     clippingPlanes: [],
@@ -38,8 +40,9 @@ export class BVHGeometryService {
     vertexShader: standartMeshMaterialVertex,
     fragmentShader: standartMeshMaterialFragment,
     uniforms: {
+      u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
       clippingPlane: { value: null },
-      u_color: { value: new THREE.Color(0x00ff00) }
+      hasLines: { value: 1. }
     },
     side: THREE.BackSide,
     clippingPlanes: [],
