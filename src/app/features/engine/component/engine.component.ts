@@ -6,6 +6,7 @@ import {CameraService} from '../../../core/services/camera.service';
 import {GeometryService} from '../service/geometry.service';
 import {MaterialService} from '../service/material.service';
 import {SlicerService} from "../../slicer/service/slicer.service";
+import { BVHGeomTest } from '../service/BVHGeomTest.service';
 
 
 @Component({
@@ -21,6 +22,7 @@ export class EngineComponent implements AfterViewInit {
   geometryService = inject(GeometryService)
   materialService = inject(MaterialService)
   slicerService = inject(SlicerService)
+  bvhGeomTest = inject(BVHGeomTest)
 
   public mainCanvas = viewChild.required<ElementRef>('mainCanvas')
   public camera!: THREE.PerspectiveCamera | THREE.OrthographicCamera
@@ -71,6 +73,14 @@ export class EngineComponent implements AfterViewInit {
       this.render();
     });
 
+     // Animate clip plane
+     const time = Date.now() * 0.001;
+     this.bvhGeomTest.updateClipPlane(
+         new THREE.Vector3(Math.sin(time), Math.cos(time), 0),
+         0
+     );
+
+
     this.renderer.localClippingEnabled = true;
     this.renderer.render(this.scene, this.camera);
   }
@@ -110,6 +120,11 @@ export class EngineComponent implements AfterViewInit {
     this.slicerService.initSlicerPlanes()
   }
 
+  prepareTestBVH(){
+    this.bvhGeomTest.init()
+    this.scene.add(this.bvhGeomTest.frontModel, this.bvhGeomTest.backModel, this.bvhGeomTest.outlineLines)
+  }
+
   protected initScene() {
     // set canvas
     this.canvas = this.getCanvas()
@@ -135,13 +150,15 @@ export class EngineComponent implements AfterViewInit {
     // register new light
     this.scene.add(this.light)
 
-    this.prepareSlicers()
+    // this.prepareSlicers()
 
     // prepare material
-    this.prepareMaterial()
+    // this.prepareMaterial()
 
     // simple geometry loader
-    this.prepareGeometry()
+    // this.prepareGeometry()
+
+    this.prepareTestBVH()
   }
 
   protected getCanvas() {
