@@ -2,6 +2,13 @@ import {inject, Injectable} from '@angular/core';
 import * as THREE from 'three';
 import { MeshBVH } from 'three-mesh-bvh';
 
+/**
+ * Test box geometry with plane slicer
+ * - !! for testing only !!
+ * - used for testing BVH functionality
+ * - creates slice using plane
+ * - closes slice using stencil buffer cap
+ */
 @Injectable({
   providedIn: 'root'
 })

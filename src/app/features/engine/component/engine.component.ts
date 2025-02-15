@@ -1,12 +1,13 @@
 import {AfterViewInit, Component, ElementRef, inject, NgZone, viewChild} from '@angular/core';
 import * as THREE from 'three';
 import WebGL from 'three/addons/capabilities/WebGL.js';
-import {MapControls, OrbitControls} from 'three/examples/jsm/Addons.js';
+import {GeometryCompressionUtils, MapControls, OrbitControls} from 'three/examples/jsm/Addons.js';
 import {CameraService} from '../../../core/services/camera.service';
 import {GeometryService} from '../service/geometry.service';
 import {MaterialService} from '../service/material.service';
 import {SlicerService} from "../../slicer/service/slicer.service";
 import { BVHGeomTest } from '../service/BVHGeomTest.service';
+import { BVHGeometryService } from '../service/BVHGeometry.service';
 
 
 @Component({
@@ -23,6 +24,7 @@ export class EngineComponent implements AfterViewInit {
   materialService = inject(MaterialService)
   slicerService = inject(SlicerService)
   bvhGeomTest = inject(BVHGeomTest)
+  bvhGeometryService = inject(BVHGeometryService)
 
   public mainCanvas = viewChild.required<ElementRef>('mainCanvas')
   public camera!: THREE.PerspectiveCamera | THREE.OrthographicCamera
@@ -73,56 +75,16 @@ export class EngineComponent implements AfterViewInit {
       this.render();
     });
 
-     // Animate clip plane
-     const time = Date.now() * 0.001;
-     this.bvhGeomTest.updateClipPlane(
-         new THREE.Vector3(Math.sin(time), Math.cos(time), 0),
-         0
-     );
+    //  // Animate clip plane
+    //  const time = Date.now() * 0.001;
+    //  this.bvhGeomTest.updateClipPlane(
+    //      new THREE.Vector3(Math.sin(time), Math.cos(time), 0),
+    //      0
+    //  );
 
 
     this.renderer.localClippingEnabled = true;
     this.renderer.render(this.scene, this.camera);
-  }
-
-  // TODO: add cameras to services
-  public preparePerspectiveCamera(): THREE.PerspectiveCamera {
-    //TODO: change camera values to variables
-    // FOV, aspectRation, near, far
-    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-    this.camera.position.z = 5
-    return this.camera
-  }
-
-// TODO end of refactor
-
-  public prepareOrthographicCamera(): THREE.OrthographicCamera {
-    this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000)
-    this.camera.position.z = 5
-    return this.camera
-  }
-
-  prepareGeometry() {
-    this.geometryService.initGeometry()
-    this.geometryService.geometry.forEach(geometry => {
-      // geometry.setRotationFromEuler(new THREE.Euler(0.25, 0, 0))
-      this.scene.add(geometry)
-    })
-
-    this.geometryService.slicerGeometries.forEach(slicer => this.scene.add(slicer))
-  }
-
-  prepareMaterial() {
-    this.materialService.initMaterial(new THREE.Vector4(0, 0, 1, 0))
-  }
-
-  prepareSlicers() {
-    this.slicerService.initSlicerPlanes()
-  }
-
-  prepareTestBVH(){
-    this.bvhGeomTest.init()
-    this.scene.add(this.bvhGeomTest.frontModel, this.bvhGeomTest.backModel, this.bvhGeomTest.outlineLines)
   }
 
   protected initScene() {
@@ -150,15 +112,16 @@ export class EngineComponent implements AfterViewInit {
     // register new light
     this.scene.add(this.light)
 
-    // this.prepareSlicers()
+    this.prepareSlicers()
 
     // prepare material
-    // this.prepareMaterial()
+    this.prepareMaterial()
 
     // simple geometry loader
-    // this.prepareGeometry()
-
-    this.prepareTestBVH()
+    this.prepareGeometry()
+ 
+    // this.prepareBVHGeometry()
+    // this.prepareTestBVH()
   }
 
   protected getCanvas() {
@@ -197,6 +160,52 @@ export class EngineComponent implements AfterViewInit {
     // TODO: add factory for adding multiple lights
     this.light = new THREE.AmbientLight()
     this.light.position.z = 10
+  }
+
+  // TODO: add cameras to services
+  public preparePerspectiveCamera(): THREE.PerspectiveCamera {
+    //TODO: change camera values to variables
+    // FOV, aspectRation, near, far
+    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+    this.camera.position.z = 5
+    return this.camera
+  }
+
+// TODO end of refactor
+
+  public prepareOrthographicCamera(): THREE.OrthographicCamera {
+    this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000)
+    this.camera.position.z = 5
+    return this.camera
+  }
+
+  prepareGeometry() {
+    this.geometryService.initGeometry()
+    this.geometryService.geometry.forEach(geometry => {
+      const geomBVH = this.bvhGeometryService.getGeometryBVH(geometry)
+      this.scene.add(geomBVH.model, geomBVH.cap)
+    })
+
+    this.geometryService.slicerGeometries.forEach(slicer => this.scene.add(slicer))
+  }
+
+  prepareMaterial() {
+    this.materialService.initMaterial(new THREE.Vector4(0, 0, 1, 0))
+  }
+
+  prepareSlicers() {
+    this.slicerService.initSlicerPlanes()
+    this.bvhGeometryService.init(this.slicerService.getSlicerPlaneForSlicing())
+  }
+
+  prepareTestBVH(){
+    this.bvhGeomTest.init()
+    this.scene.add(this.bvhGeomTest.frontModel, this.bvhGeomTest.backModel)
+  }
+
+  prepareBVHGeometry(){
+
+    this.bvhGeometryService.updateClipPlaneForGeometries()
   }
 
 }

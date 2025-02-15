@@ -20,12 +20,8 @@ export class MaterialService {
       uniforms: {
         slicePlane: {value: slicePlane}
       },
-      clippingPlanes: [...this.slicerService.slicerPlanes],
+      clippingPlanes: [this.slicerService.slicerPlane],
       clipping: true,
-      stencilWrite: true,
-      stencilRef: 1,
-      stencilFunc: THREE.AlwaysStencilFunc,
-      stencilZPass: THREE.ReplaceStencilOp,
     }));
   }
 }

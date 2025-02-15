@@ -8,10 +8,10 @@ export class SlicerService {
   //https://threejs.org/examples/?q=sli#webgpu_tsl_angular_slicing
   // slicing is showed in docs\slicing_using_fragment_shader_GPT.md
 
-  public readonly slicerPlanes: THREE.Plane[] = []
+  public slicerPlane: THREE.Plane
 
   initSlicerPlanes() {
-    this.slicerPlanes.push(this.getSlicerPlane())
+    this.slicerPlane = this.getSlicerPlane()
   }
 
   getSlicerPlane(position?: THREE.Vector3) {
@@ -28,6 +28,18 @@ export class SlicerService {
 
   setSlicerPlanePosition(slicerPlane: THREE.Plane, position: THREE.Vector3) {
     const planeVector = this.getSlicerVector4(position)
-    this.slicerPlanes.at(0)!.set(new THREE.Vector3(planeVector.normalX, planeVector.normalY, planeVector.normalZ), planeVector.d)
+    this.slicerPlane!.set(new THREE.Vector3(planeVector.normalX, planeVector.normalY, planeVector.normalZ), planeVector.d)
+  }
+
+  getSlicerPlaneForSlicing(): THREE.Plane{
+
+    const plane = this.slicerPlane
+    if(plane === undefined) throw Error('plane is undefined')
+
+    return plane
+  }
+
+  getSlicerAsVector(): THREE.Vector4{
+    return new THREE.Vector4(this.slicerPlane.normal.x, this.slicerPlane.normal.y, this.slicerPlane.normal.z, this.slicerPlane.constant)
   }
 }
