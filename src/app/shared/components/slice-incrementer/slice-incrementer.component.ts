@@ -1,6 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
-import { MatSliderModule } from '@angular/material/slider';
-import { GeometryService } from '../../../features/engine/service/geometry.service';
+import {Component, inject, signal} from '@angular/core';
+import {MatSliderModule} from '@angular/material/slider';
+import {GeometryService} from '../../../features/engine/service/geometry.service';
 import * as THREE from 'three';
 
 @Component({
@@ -19,17 +19,17 @@ export class SliceIncrementerComponent {
 
 
   updateSlice(event: any) {
-    const oldPos = this.geometryService.slicers.at(0)?.position;
+    const oldPos = this.geometryService.slicerGeometries.at(0)?.position;
     let newPos: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
-    if(oldPos){
-      if(this.lastPos() < event.target.valueAsNumber){
+    if (oldPos) {
+      if (this.lastPos() < event.target.valueAsNumber) {
         newPos = new THREE.Vector3(0.0, 0.0, oldPos.z - Math.abs(event.target.valueAsNumber));
         this.lastPos.set(event.target.valueAsNumber);
-      }else{
+      } else {
         newPos = new THREE.Vector3(0.0, 0.0, oldPos.z + Math.abs(event.target.valueAsNumber));
         this.lastPos.set(event.target.valueAsNumber);
       }
     }
-      this.geometryService.updateSlicerPosition(newPos);
+    this.geometryService.updateSlicerPosition(newPos);
   }
 }
