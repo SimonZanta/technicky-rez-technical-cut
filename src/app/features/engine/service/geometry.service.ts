@@ -18,24 +18,28 @@ export class GeometryService {
 
   initGeometry() {
     //plane refactor
-    this.createSlicerGeometry(new THREE.PlaneGeometry(0.2, 0.2))
+    this.createSlicerGeometry(new THREE.PlaneGeometry(10, 10))
+
 
     this.materialService.initMaterial(new THREE.Vector4(0, 0, 1, 0))
-    // this.createObjectGeometry(new THREE.SphereGeometry(1))
-    this.createObjectGeometry(new THREE.BoxGeometry(1, 1, 1))
+    this.createObjectGeometry(new THREE.SphereGeometry(1))
+    // this.createObjectGeometry(new THREE.BoxGeometry(1, 1, 1))
   }
 
   createObjectGeometry(object: BufferGeometry) {
     const geometry = object;
+    geometry.rotateY(0.4)
     this.geometry.push(geometry);
   }
 
   createSlicerGeometry(object: BufferGeometry) {
     const geometry = object;
-    const material = new THREE.ShaderMaterial({
-      side: THREE.DoubleSide,
-      wireframe: true
-    });
+    // const material = new THREE.ShaderMaterial({
+    //   side: THREE.DoubleSide,
+    //   wireframe: true
+    // });
+
+    const material = this.bvhGeometryService.capMaterial
 
     const mesh = new THREE.Mesh(geometry, material);
     this.slicerGeometries.push(mesh);

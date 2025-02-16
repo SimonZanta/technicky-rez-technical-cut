@@ -120,7 +120,6 @@ export class EngineComponent implements AfterViewInit {
     // simple geometry loader
     this.prepareGeometry()
 
-    // this.prepareBVHGeometry()
     // this.prepareTestBVH()
   }
 
@@ -135,6 +134,8 @@ export class EngineComponent implements AfterViewInit {
       antialias: true, // sets antialiasing
       stencil: true // sets stencil buffer
     })
+
+    this.renderer.clearStencil();
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -183,7 +184,7 @@ export class EngineComponent implements AfterViewInit {
     this.geometryService.initGeometry()
     this.geometryService.geometry.forEach(geometry => {
       const geomBVH = this.bvhGeometryService.getGeometryBVH(geometry)
-      this.scene.add(geomBVH.model, geomBVH.cap)
+      this.scene.add(geomBVH.front, geomBVH.back)
     })
 
     this.geometryService.slicerGeometries.forEach(slicer => this.scene.add(slicer))
@@ -200,7 +201,7 @@ export class EngineComponent implements AfterViewInit {
 
   prepareTestBVH() {
     this.bvhGeomTest.init()
-    this.scene.add(this.bvhGeomTest.frontModel, this.bvhGeomTest.backModel)
+    this.scene.add(this.bvhGeomTest.frontModel, this.bvhGeomTest.backModel, this.bvhGeomTest.capMesh)
   }
 
 }

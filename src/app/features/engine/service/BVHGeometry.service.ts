@@ -4,6 +4,10 @@ import standartMeshMaterialVertex from '../shaders/slicerShader/standartMeshMate
 import standartMeshMaterialFragment from '../shaders/slicerShader/standartMeshMaterialFragment.glsl'
 import { SlicerService } from '../../slicer/service/slicer.service';
 
+class BVHGeom {
+  front: THREE.Mesh;
+  back: THREE.Mesh;
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -13,30 +17,33 @@ export class BVHGeometryService {
 
   slicerService = inject(SlicerService)
 
-  bvhGeometrie: { model: THREE.Mesh, cap: THREE.Mesh }[] = []
+  bvhGeometrie: BVHGeom[] = []
 
   private clippingPlane: THREE.Plane;
   frontModel: THREE.Mesh;
   backModel: THREE.Mesh;
 
-  private frontMaterial = new THREE.ShaderMaterial({
-    vertexShader: standartMeshMaterialVertex,
-    fragmentShader: standartMeshMaterialFragment,
-    uniforms: {
-      u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-      clippingPlane: { value: null },
-      u_color: { value: new THREE.Color(0xff00ff) },
-      hasLines: { value: 0. }
-    },
+  private frontMaterial = new THREE.MeshStandardMaterial({
+    color: 0x0000ff,
     side: THREE.FrontSide,
     clippingPlanes: [],
     stencilWrite: true,
     stencilFunc: THREE.AlwaysStencilFunc,
-    stencilRef: 1,
-    stencilZPass: THREE.IncrementWrapStencilOp
+    stencilRef: 0,
+    stencilZPass: THREE.ReplaceStencilOp
   });
 
-  private backMaterial = new THREE.ShaderMaterial({
+  private backMaterial = new THREE.MeshStandardMaterial({
+    color: 0x00ff00,
+    side: THREE.BackSide,
+    clippingPlanes: [],
+    stencilWrite: true,
+    stencilFunc: THREE.AlwaysStencilFunc,
+    stencilRef: 1,
+    stencilZPass: THREE.ReplaceStencilOp
+  });
+
+  public capMaterial = new THREE.ShaderMaterial({
     vertexShader: standartMeshMaterialVertex,
     fragmentShader: standartMeshMaterialFragment,
     uniforms: {
@@ -44,19 +51,16 @@ export class BVHGeometryService {
       clippingPlane: { value: null },
       hasLines: { value: 1. }
     },
-    side: THREE.BackSide,
     clippingPlanes: [],
+    side: THREE.DoubleSide,
     stencilWrite: true,
-    stencilFunc: THREE.AlwaysStencilFunc,
+    stencilFunc: THREE.EqualStencilFunc,
     stencilRef: 1,
-    stencilZPass: THREE.DecrementWrapStencilOp
   });
+
 
   init(clippingPlane: THREE.Plane) {
     this.clippingPlane = clippingPlane
-
-    this.backMaterial.uniforms['clippingPlane'].value = this.slicerService.getSlicerAsVector()
-    this.frontMaterial.uniforms['clippingPlane'].value = this.slicerService.getSlicerAsVector()
 
     this.backMaterial.clippingPlanes?.push(this.clippingPlane)
     this.frontMaterial.clippingPlanes?.push(this.clippingPlane)
@@ -65,7 +69,10 @@ export class BVHGeometryService {
   getGeometryBVH(geometry: THREE.BufferGeometry) {
     if (!this.clippingPlane) throw Error('no clipping plane')
 
-    const finalGeom = { model: new THREE.Mesh(geometry, this.frontMaterial), cap: new THREE.Mesh(geometry, this.backMaterial) }
+    const finalGeom: BVHGeom = {
+      front: new THREE.Mesh(geometry, this.frontMaterial),
+      back: new THREE.Mesh(geometry, this.backMaterial),
+    }
 
     this.bvhGeometrie.push(finalGeom)
 
@@ -76,12 +83,12 @@ export class BVHGeometryService {
     this.frontMaterial.clippingPlanes = [clipPlane]
     this.backMaterial.clippingPlanes = [clipPlane]
 
-    this.frontMaterial.uniforms['clippingPlane'].value = this.slicerService.getSlicerAsVector(clipPlane)
-    this.backMaterial.uniforms['clippingPlane'].value = this.slicerService.getSlicerAsVector(clipPlane)
+    // this.frontMaterial.uniforms['clippingPlane'].value = this.slicerService.getSlicerAsVector(clipPlane)
+    // this.backMaterial.uniforms['clippingPlane'].value = this.slicerService.getSlicerAsVector(clipPlane)
 
     this.bvhGeometrie.forEach(geom => {
-      geom.model.material = this.frontMaterial
-      geom.cap.material = this.backMaterial
+      geom.front.material = this.frontMaterial
+      geom.back.material = this.backMaterial
     })
   }
 
