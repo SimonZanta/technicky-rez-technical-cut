@@ -1,6 +1,6 @@
-import {Component, inject, signal} from '@angular/core';
-import {MatSliderModule} from '@angular/material/slider';
-import {GeometryService} from '../../../features/engine/service/geometry.service';
+import { Component, inject, signal } from '@angular/core';
+import { MatSliderModule } from '@angular/material/slider';
+import { GeometryService } from '../../../features/engine/service/geometry.service';
 import * as THREE from 'three';
 
 @Component({

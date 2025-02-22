@@ -2,6 +2,8 @@ import { inject, Injectable } from '@angular/core';
 import * as THREE from 'three';
 import standartMeshMaterialVertex from '../shaders/slicerShader/standartMeshMaterialVertex.glsl'
 import standartMeshMaterialFragment from '../shaders/slicerShader/standartMeshMaterialFragment.glsl'
+import vertexShader from '../shaders/slicerShader/vertexShader.glsl'
+import fragmentShader from '../shaders/slicerShader/fragmentShader.glsl'
 import { SlicerService } from '../../slicer/service/slicer.service';
 
 class BVHGeom {
@@ -28,19 +30,21 @@ export class BVHGeometryService {
     side: THREE.FrontSide,
     clippingPlanes: [],
     stencilWrite: true,
-    stencilFunc: THREE.AlwaysStencilFunc,
-    stencilRef: 0,
-    stencilZPass: THREE.ReplaceStencilOp
+    stencilFail: THREE.IncrementWrapStencilOp,
+    stencilZFail: THREE.IncrementWrapStencilOp,
+    stencilZPass: THREE.IncrementWrapStencilOp,
   });
 
   private backMaterial = new THREE.MeshStandardMaterial({
     color: 0x00ff00,
     side: THREE.BackSide,
     clippingPlanes: [],
+    colorWrite: false,
+    depthWrite: false,
     stencilWrite: true,
-    stencilFunc: THREE.AlwaysStencilFunc,
-    stencilRef: 1,
-    stencilZPass: THREE.ReplaceStencilOp
+    stencilFail: THREE.DecrementWrapStencilOp,
+    stencilZFail: THREE.DecrementWrapStencilOp,
+    stencilZPass: THREE.DecrementWrapStencilOp,
   });
 
   public capMaterial = new THREE.ShaderMaterial({
@@ -51,13 +55,13 @@ export class BVHGeometryService {
       clippingPlane: { value: null },
       hasLines: { value: 1. }
     },
-    clippingPlanes: [],
     side: THREE.DoubleSide,
     stencilWrite: true,
-    stencilFunc: THREE.EqualStencilFunc,
-    stencilRef: 1,
+    stencilFunc: THREE.NotEqualCompare,
+    stencilFail: THREE.ZeroStencilOp,
+    stencilZFail: THREE.ZeroStencilOp,
+    stencilZPass: THREE.ZeroStencilOp,
   });
-
 
   init(clippingPlane: THREE.Plane) {
     this.clippingPlane = clippingPlane
@@ -66,34 +70,22 @@ export class BVHGeometryService {
     this.frontMaterial.clippingPlanes?.push(this.clippingPlane)
   }
 
-  getGeometryBVH(geometry: THREE.BufferGeometry) {
+  getGeometryBVH(geometry: THREE.Mesh) {
     if (!this.clippingPlane) throw Error('no clipping plane')
 
+    const front = new THREE.Mesh;
+    front.copy(geometry)
+    front.material = this.frontMaterial
+
+    const back = new THREE.Mesh;
+    back.copy(geometry)
+    back.material = this.backMaterial
+
     const finalGeom: BVHGeom = {
-      front: new THREE.Mesh(geometry, this.frontMaterial),
-      back: new THREE.Mesh(geometry, this.backMaterial),
+      front: front,
+      back: back,
     }
 
-    this.bvhGeometrie.push(finalGeom)
-
     return finalGeom
-  }
-
-  public updateClipPlaneForGeometries(clipPlane: THREE.Plane) {
-    this.frontMaterial.clippingPlanes = [clipPlane]
-    this.backMaterial.clippingPlanes = [clipPlane]
-
-    // this.frontMaterial.uniforms['clippingPlane'].value = this.slicerService.getSlicerAsVector(clipPlane)
-    // this.backMaterial.uniforms['clippingPlane'].value = this.slicerService.getSlicerAsVector(clipPlane)
-
-    this.bvhGeometrie.forEach(geom => {
-      geom.front.material = this.frontMaterial
-      geom.back.material = this.backMaterial
-    })
-  }
-
-  public updateClipPlane(plane: THREE.Plane) {
-    this.clippingPlane = plane
-    this.updateClipPlaneForGeometries(this.clippingPlane)
   }
 }

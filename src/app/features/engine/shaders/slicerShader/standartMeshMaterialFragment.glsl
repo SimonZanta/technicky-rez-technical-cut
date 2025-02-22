@@ -1,8 +1,6 @@
 uniform vec3 u_color;
-uniform vec2 u_resolution;
-  varying vec3 vWorldPosition;
 varying vec2 vUv;
-  uniform float hasLines;
+uniform float hasLines;
 
 #include <clipping_planes_pars_fragment>
 void main() {
@@ -11,9 +9,8 @@ void main() {
   if(hasLines == 0.0){
     gl_FragColor = vec4(vec3(1.0, 1.0, 1.0), 1.0); // Line color
   }else{
-  vec2 st = vUv.xy;
-	vec3 canvas = vec3(0.0);
-    
+    vec2 st = vUv.xy;
+
     float line = .003;
     
     float angle =  3.14159265358 / 4.0;
