@@ -3,9 +3,13 @@ import * as THREE from 'three';
 import { BufferGeometry } from 'three';
 import { SlicerService } from '../../slicer/service/slicer.service';
 import { MaterialService } from './material.service';
-import { BVHGeometryService } from './BVHGeometry.service';
+import { BVHGeometryService, stencilGeometry } from './BVHGeometry.service';
 import { ModelLoaderService } from './modelLoader.service';
 
+class stencilGeometryGroup {
+  groupName: string;
+  geometry: stencilGeometry | stencilGeometryGroup
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -16,6 +20,7 @@ export class GeometryService {
   modelLoaderService = inject(ModelLoaderService)
 
   public readonly geometry = signal<THREE.Group>(new THREE.Group());
+  public readonly stencilGeometry = signal<stencilGeometryGroup | null>(null);
   public readonly slicerGeometries: THREE.Mesh[] = [];
 
   async initGeometry() {
@@ -27,8 +32,51 @@ export class GeometryService {
     // this.createObjectGeometry(new THREE.SphereGeometry(1))
     // this.createObjectGeometry(new THREE.BoxGeometry(1, 1, 1))
     await this.modelLoaderService.loadOBJModel('assets/models/robotical-arm.obj').then((object) => {
-      this.geometry().add(object);
+      const tempGroup = new THREE.Group()
+      tempGroup.add(object)
+      this.geometry().add(tempGroup);
     })
+
+    this.getStencilBufferedGeometryFromObject(this.geometry())
+  }
+
+  getStencilBufferedGeometryFromObject(geometry: THREE.Group) {
+    const group: THREE.Group = new THREE.Group
+    group.name = geometry.name
+
+
+    geometry.children.forEach(object => {
+
+      const tempGroup = new THREE.Group
+      const geometryGroup = this.recursiveGeometryAdding(object)
+
+      console.log(geometryGroup)
+
+      if (geometryGroup) {
+        tempGroup.add(geometryGroup)
+        group.add(tempGroup)
+      }
+    })
+    return group
+  }
+
+  recursiveGeometryAdding(geometry: THREE.Object3D) {
+    const group = new THREE.Group
+    group.name = geometry.name
+
+    if (geometry instanceof THREE.Mesh) {
+      const geometryBVH: stencilGeometry = this.bvhGeometryService.getGeometryBVH(geometry)
+      group.add(geometryBVH.front, geometryBVH.back)
+    } else if (geometry instanceof THREE.Group) {
+      const group = new stencilGeometryGroup()
+      group.groupName = geometry.name
+      geometry.children.forEach(subGeometry => {
+        this.recursiveGeometryAdding(subGeometry)
+      });
+    }
+    if (group.children.length == 0) return null
+
+    return group
   }
 
   createObjectGeometry(object: BufferGeometry) {

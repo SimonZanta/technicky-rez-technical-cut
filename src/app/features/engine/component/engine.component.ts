@@ -9,8 +9,7 @@ import { SlicerService } from "../../slicer/service/slicer.service";
 import { BVHGeomTest } from '../service/BVHGeomTest.service';
 import { BVHGeometryService } from '../service/BVHGeometry.service';
 import { ModelLoaderService } from '../service/modelLoader.service';
-
-
+import CameraControls from 'camera-controls';
 @Component({
   selector: 'app-engine',
   standalone: true,
@@ -34,7 +33,8 @@ export class EngineComponent implements AfterViewInit {
   private renderer!: THREE.WebGLRenderer
   private canvas!: HTMLCanvasElement
   private light!: THREE.AmbientLight
-  private controls!: MapControls
+  private controls!: CameraControls
+  private clock = new THREE.Clock();
   private frameId = 0
 
   constructor(private ngZone: NgZone) {
@@ -59,7 +59,6 @@ export class EngineComponent implements AfterViewInit {
         this.render();
       } else {
         window.addEventListener('DOMContentLoaded', () => {
-          this.controls.update()
           this.render();
         });
       }
@@ -76,6 +75,9 @@ export class EngineComponent implements AfterViewInit {
       this.render();
     });
 
+    const delta = this.clock.getDelta();
+    this.controls.update(delta)
+
     //  // Animate clip plane
     //  const time = Date.now() * 0.001;
     //  this.bvhGeomTest.updateClipPlane(
@@ -89,6 +91,8 @@ export class EngineComponent implements AfterViewInit {
   }
 
   protected initScene() {
+    CameraControls.install({ THREE: THREE });
+
     // set canvas
     this.canvas = this.getCanvas()
 
@@ -119,7 +123,9 @@ export class EngineComponent implements AfterViewInit {
     this.prepareMaterial()
 
     // simple geometry loader
-    this.prepareGeometry()
+    this.prepareGeometry().then(() => {
+      this.fitObjectToCamera()
+    })
 
     // this.prepareTestBVH()
     // this.prepareOBJLoader()
@@ -152,8 +158,12 @@ export class EngineComponent implements AfterViewInit {
 
   protected prepareControls() {
     // https://threejs.org/docs/#examples/en/controls/OrbitControls.update
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement)
-    this.controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.ROTATE, RIGHT: THREE.MOUSE.DOLLY }
+    // this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+    // this.controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.ROTATE, RIGHT: THREE.MOUSE.DOLLY }
+
+    this.controls = new CameraControls(this.camera, this.renderer.domElement);
+
+    this.controls.mouseButtons = { left: CameraControls.ACTION.TRUCK, middle: CameraControls.ACTION.ROTATE, right: THREE.MOUSE.DOLLY, wheel: CameraControls.ACTION.DOLLY }
     this.controls.minDistance = 0.1;
     this.controls.maxDistance = 1000;
     this.controls.maxPolarAngle = Math.PI / 2;
@@ -169,7 +179,7 @@ export class EngineComponent implements AfterViewInit {
   public preparePerspectiveCamera(): THREE.PerspectiveCamera {
     //TODO: change camera values to variables
     // FOV, aspectRation, near, far
-    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
+    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100000)
     this.camera.position.z = 5
     return this.camera
   }
@@ -193,10 +203,11 @@ export class EngineComponent implements AfterViewInit {
       this.scene.add(slicer)
     })
 
+    const gridHelper = new THREE.GridHelper(10000, 100)
+    this.scene.add(gridHelper)
   }
 
   recursiveGeometryAdding(geometry: THREE.Object3D) {
-    console.log(geometry.scale)
     let geomBVH;
     if (geometry instanceof THREE.Mesh) {
       geomBVH = this.bvhGeometryService.getGeometryBVH(geometry)
@@ -220,5 +231,36 @@ export class EngineComponent implements AfterViewInit {
   prepareTestBVH() {
     this.bvhGeomTest.init()
     this.scene.add(this.bvhGeomTest.frontModel, this.bvhGeomTest.backModel, this.bvhGeomTest.capMesh)
+  }
+
+  fitObjectToCamera() {
+    let boundingBox = new THREE.Box3()
+    let boundingWidth = 0;
+    let boundingHeight = 0;
+    let boundingDepth = 0;
+
+    this.geometryService.geometry().children.forEach((object) => {
+      const tempBoundingBox = this.getBoundingBox(object)
+      const boundingSize = tempBoundingBox.getSize(new THREE.Vector3())
+
+      const tempBoundingWidth = boundingSize.x;
+      const tempBoundingHeight = boundingSize.y;
+      const tempBoundingDepth = boundingSize.z;
+
+      if (tempBoundingWidth > boundingWidth || tempBoundingHeight > boundingHeight || tempBoundingDepth > boundingDepth) {
+        boundingBox = tempBoundingBox
+        boundingWidth = tempBoundingWidth;
+        boundingHeight = tempBoundingHeight;
+        boundingDepth = tempBoundingDepth;
+      }
+    })
+
+    const distanceToFit = this.controls.getDistanceToFitBox(boundingWidth, boundingHeight, boundingDepth);
+    this.controls.fitToBox(boundingBox, true);
+  }
+
+  getBoundingBox(object: THREE.Object3D) {
+    const boundingBox = new THREE.Box3().setFromObject(object);
+    return boundingBox;
   }
 }
