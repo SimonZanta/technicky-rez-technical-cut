@@ -8,6 +8,7 @@ import { MaterialService } from '../service/material.service';
 import { SlicerService } from "../../slicer/service/slicer.service";
 import { BVHGeomTest } from '../service/BVHGeomTest.service';
 import { BVHGeometryService } from '../service/BVHGeometry.service';
+import { ModelLoaderService } from '../service/modelLoader.service';
 
 
 @Component({
@@ -120,8 +121,8 @@ export class EngineComponent implements AfterViewInit {
     // simple geometry loader
     this.prepareGeometry()
 
-    // this.prepareBVHGeometry()
     // this.prepareTestBVH()
+    // this.prepareOBJLoader()
   }
 
   protected getCanvas() {
@@ -135,6 +136,8 @@ export class EngineComponent implements AfterViewInit {
       antialias: true, // sets antialiasing
       stencil: true // sets stencil buffer
     })
+
+    this.renderer.clearStencil();
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -179,14 +182,30 @@ export class EngineComponent implements AfterViewInit {
     return this.camera
   }
 
-  prepareGeometry() {
-    this.geometryService.initGeometry()
-    this.geometryService.geometry.forEach(geometry => {
-      const geomBVH = this.bvhGeometryService.getGeometryBVH(geometry)
-      this.scene.add(geomBVH.model, geomBVH.cap)
+  async prepareGeometry() {
+    await this.geometryService.initGeometry().then(() => {
+      this.geometryService.geometry().traverse(geometry => {
+        this.recursiveGeometryAdding(geometry)
+      })
     })
 
-    this.geometryService.slicerGeometries.forEach(slicer => this.scene.add(slicer))
+    this.geometryService.slicerGeometries.forEach(slicer => {
+      this.scene.add(slicer)
+    })
+
+  }
+
+  recursiveGeometryAdding(geometry: THREE.Object3D) {
+    console.log(geometry.scale)
+    let geomBVH;
+    if (geometry instanceof THREE.Mesh) {
+      geomBVH = this.bvhGeometryService.getGeometryBVH(geometry)
+      this.scene.add(geomBVH.front, geomBVH.back)
+    } else if (geometry instanceof THREE.Group) {
+      geometry.children.forEach(subGeometry => {
+        this.recursiveGeometryAdding(subGeometry)
+      });
+    }
   }
 
   prepareMaterial() {
@@ -200,7 +219,6 @@ export class EngineComponent implements AfterViewInit {
 
   prepareTestBVH() {
     this.bvhGeomTest.init()
-    this.scene.add(this.bvhGeomTest.frontModel, this.bvhGeomTest.backModel)
+    this.scene.add(this.bvhGeomTest.frontModel, this.bvhGeomTest.backModel, this.bvhGeomTest.capMesh)
   }
-
 }

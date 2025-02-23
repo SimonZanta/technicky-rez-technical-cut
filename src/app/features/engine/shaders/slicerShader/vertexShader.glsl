@@ -15,13 +15,12 @@ varying vec2 vUv;
 varying vec3 vNormal;
 void main() {
   #include <begin_vertex>
+  #include <project_vertex>
+  #include <clipping_planes_vertex>
   //  vPosition = position;
   vPosition = position;
   vNormal = normalize(normalMatrix * normal);
   vUv = uv;
 
   gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-
-  #include <project_vertex>
-  #include <clipping_planes_vertex>
 }

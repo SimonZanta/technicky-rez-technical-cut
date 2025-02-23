@@ -1,6 +1,8 @@
-import {inject, Injectable} from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import * as THREE from 'three';
 import { MeshBVH } from 'three-mesh-bvh';
+import standartMeshMaterialVertex from '../shaders/slicerShader/standartMeshMaterialVertex.glsl'
+import standartMeshMaterialFragment from '../shaders/slicerShader/standartMeshMaterialFragment.glsl'
 
 /**
  * Test box geometry with plane slicer
@@ -10,7 +12,7 @@ import { MeshBVH } from 'three-mesh-bvh';
  * - closes slice using stencil buffer cap
  */
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class BVHGeomTest {
 
@@ -25,19 +27,19 @@ export class BVHGeomTest {
     private colliderBvh: MeshBVH;
 
 
-     // Temporary variables for calculations
-     private tempLine = new THREE.Line3();
-     private tempVector = new THREE.Vector3();
-     private localPlane = new THREE.Plane();
-     private inverseMatrix = new THREE.Matrix4();
+    // Temporary variables for calculations
+    private tempLine = new THREE.Line3();
+    private tempVector = new THREE.Vector3();
+    private localPlane = new THREE.Plane();
+    private inverseMatrix = new THREE.Matrix4();
 
-    init(){
+    init() {
         // Clipping plane
         this.clippingPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0);
 
         // Create geometry
         const geometry = new THREE.BoxGeometry(2, 2, 2);
-        
+
         // Create BVH
         this.colliderBvh = new MeshBVH(geometry);
 
@@ -48,8 +50,8 @@ export class BVHGeomTest {
             clippingPlanes: [this.clippingPlane],
             stencilWrite: true,
             stencilFunc: THREE.AlwaysStencilFunc,
-            stencilRef: 1,
-            stencilZPass: THREE.IncrementWrapStencilOp
+            stencilRef: 0,
+            stencilZPass: THREE.ReplaceStencilOp
         });
 
         const backMaterial = new THREE.MeshStandardMaterial({
@@ -59,8 +61,26 @@ export class BVHGeomTest {
             stencilWrite: true,
             stencilFunc: THREE.AlwaysStencilFunc,
             stencilRef: 1,
-            stencilZPass: THREE.DecrementWrapStencilOp
+            stencilZPass: THREE.ReplaceStencilOp
         });
+
+        const capMaterial = new THREE.ShaderMaterial({
+            vertexShader: standartMeshMaterialVertex,
+            fragmentShader: standartMeshMaterialFragment,
+            uniforms: {
+                u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+                clippingPlane: { value: new THREE.Vector4(0, 0, -1, 0) },
+                hasLines: { value: 1. }
+            },
+            clippingPlanes: [],
+            stencilWrite: true,
+            stencilFunc: THREE.EqualStencilFunc,
+            stencilRef: 1,
+            stencilZPass: THREE.ReplaceStencilOp
+        });
+
+        const capGeometry = new THREE.PlaneGeometry(10, 10); // Adjust size as needed
+        this.capMesh = new THREE.Mesh(capGeometry, capMaterial);
 
         // Create meshes
         this.frontModel = new THREE.Mesh(geometry, frontMaterial);
@@ -71,7 +91,7 @@ export class BVHGeomTest {
         const linePosAttr = new THREE.BufferAttribute(new Float32Array(300000), 3, false);
         linePosAttr.setUsage(THREE.DynamicDrawUsage);
         lineGeometry.setAttribute('position', linePosAttr);
-        
+
         this.outlineLines = new THREE.LineSegments(
             lineGeometry,
             new THREE.LineBasicMaterial({ color: 0x00acc1 })
