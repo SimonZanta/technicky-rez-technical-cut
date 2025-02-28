@@ -25,12 +25,11 @@ export class GeometryService {
 
   async initGeometry() {
     //plane refactor
-    this.createSlicerGeometry(new THREE.PlaneGeometry(1200, 1200))
-
-
     this.materialService.initMaterial(new THREE.Vector4(0, 0, 1, 0))
+
     // this.createObjectGeometry(new THREE.SphereGeometry(1))
-    this.createObjectGeometry(new THREE.BoxGeometry(1, 1, 1))
+    // this.createObjectGeometry(new THREE.BoxGeometry(1, 1, 1))
+
     await this.modelLoaderService.loadOBJModel('assets/models/robotical-arm.obj').then((object) => {
       const tempGroup = new THREE.Group()
       tempGroup.add(object)
@@ -46,7 +45,6 @@ export class GeometryService {
 
     geometry.children.forEach(object => {
       const geometryGroup = this.recursiveGeometryAdding(object);
-      // console.log(geometryGroup);
       if (geometryGroup) {
         group.add(geometryGroup);
       }
@@ -60,8 +58,22 @@ export class GeometryService {
     group.name = geometry.name;
 
     if (geometry instanceof THREE.Mesh) {
-      const geometryBVH: stencilGeometry = this.bvhGeometryService.getGeometryBVH(geometry);
+      // create plane geometry
+      const objBoundingBox = new THREE.Box3().setFromObject(geometry);
+
+      const plane = this.getSlicerPlaneGeometryFromMesh(objBoundingBox)
+      const geometryBVH: stencilGeometry = this.bvhGeometryService.getGeometryBVH(geometry, plane);
+
+      const cap = geometryBVH.cap
+
+      const boundingPosition = objBoundingBox.getCenter(new THREE.Vector3())
+      const planeZ = this.slicerService.getSlicerAsVector().z
+
+      cap.position.set(boundingPosition.x, boundingPosition.y, 0)
+
       group.add(geometryBVH.front, geometryBVH.back);
+      this.slicerGeometries.push(cap)
+
     } else if (geometry instanceof THREE.Group) {
       geometry.children.forEach(subGeometry => {
         const childGroup = this.recursiveGeometryAdding(subGeometry);
@@ -80,23 +92,23 @@ export class GeometryService {
     this.geometry().add(geometry);
   }
 
-  createSlicerGeometry(object: BufferGeometry) {
-    const geometry = object;
+  getSlicerPlaneGeometryFromMesh(object: THREE.Box3) {
+    const boundingBox = object
+    const boundingSize = boundingBox.getSize(new THREE.Vector3())
 
-    const material = this.bvhGeometryService.capMaterial
+    const tempBoundingWidth = boundingSize.x;
+    const tempBoundingHeight = boundingSize.y;
 
-
-    const mesh = new THREE.Mesh(geometry, material);
-
-    this.slicerGeometries.push(mesh);
+    return new THREE.PlaneGeometry(tempBoundingWidth, tempBoundingHeight)
   }
 
   updateSlicerPosition(position: THREE.Vector3) {
-    const slicer = this.slicerGeometries.at(0);
     const slicerPlane = this.slicerService.slicerPlane
-    if (slicer && slicerPlane) {
-      slicer.position.set(position.x, position.y, position.z);
-      this.slicerService.setSlicerPlanePosition(slicerPlane, position)
-    }
+
+    this.slicerGeometries.forEach(slicer => {
+      slicer.position.set(slicer.position.x, slicer.position.y, position.z);
+    })
+
+    this.slicerService.setSlicerPlanePosition(slicerPlane, position)
   }
 }

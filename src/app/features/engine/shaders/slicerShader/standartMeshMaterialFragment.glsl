@@ -1,4 +1,7 @@
-uniform vec3 u_color;
+uniform vec2 objectSize; // The dimensions of the object
+uniform float lineWidth; // Width of lines in world units
+uniform float lineAngle; // Angle in radians
+
 varying vec2 vUv;
 uniform float hasLines;
 
@@ -11,13 +14,16 @@ void main() {
   }else{
     vec2 st = vUv.xy;
 
-    float line = .003;
+    vec2 aspectRatio = objectSize / max(objectSize.x, objectSize.y);
+    vec2 adjustedUV = st * aspectRatio;
     
-    float angle =  3.14159265358 / 4.0;
+    float line = lineWidth;
     
-    vec2 dir = vec2(cos(angle), sin(angle));
+    float angle = lineAngle;
     
-    float distanceToLine = abs(dot(st, dir));
+    vec2 dir = normalize(vec2(cos(angle), sin(angle)));
+    
+    float distanceToLine = abs(dot(adjustedUV, dir));
     
     float linePosition = mod(distanceToLine, line * 2.);
   if (linePosition < line) {

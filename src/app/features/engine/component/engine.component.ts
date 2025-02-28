@@ -1,16 +1,13 @@
 import { AfterViewInit, Component, ElementRef, inject, NgZone, viewChild } from '@angular/core';
 import * as THREE from 'three';
 import WebGL from 'three/addons/capabilities/WebGL.js';
-import { GeometryCompressionUtils, MapControls, OrbitControls } from 'three/examples/jsm/Addons.js';
 import { CameraService } from '../../../core/services/camera.service';
 import { GeometryService } from '../service/geometry.service';
 import { MaterialService } from '../service/material.service';
 import { SlicerService } from "../../slicer/service/slicer.service";
 import { BVHGeomTest } from '../service/BVHGeomTest.service';
 import { BVHGeometryService } from '../service/BVHGeometry.service';
-import { ModelLoaderService } from '../service/modelLoader.service';
 import CameraControls from 'camera-controls';
-import { checker } from 'three/webgpu';
 @Component({
   selector: 'app-engine',
   standalone: true,
@@ -194,7 +191,6 @@ export class EngineComponent implements AfterViewInit {
 
   async prepareGeometry() {
     await this.geometryService.initGeometry().then(() => {
-      console.log(this.geometryService.stencilGeometry())
       this.geometryService.stencilGeometry().traverse(geometry => {
         this.recursiveGeometryAdding(geometry)
       })
@@ -211,7 +207,6 @@ export class EngineComponent implements AfterViewInit {
   recursiveGeometryAdding(geometry: THREE.Object3D) {
     let geomBVH;
     if (geometry instanceof THREE.Mesh) {
-      // geomBVH = this.bvhGeometryService.getGeometryBVH(geometry)
       this.scene.add(geometry)
     } else if (geometry instanceof THREE.Group) {
       geometry.children.forEach(subGeometry => {

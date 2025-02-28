@@ -9,6 +9,7 @@ import { SlicerService } from '../../slicer/service/slicer.service';
 export class stencilGeometry {
   front: THREE.Mesh;
   back: THREE.Mesh;
+  cap: THREE.Mesh;
 }
 @Injectable({
   providedIn: 'root'
@@ -24,69 +25,75 @@ export class BVHGeometryService {
   frontModel: THREE.Mesh;
   backModel: THREE.Mesh;
 
-  private frontMaterial = new THREE.ShaderMaterial({
-    vertexShader: vertexShader,
-    fragmentShader: fragmentShader,
-    side: THREE.FrontSide,
-    clippingPlanes: [],
-    clipping: true,
-    stencilWrite: true,
-    stencilFail: THREE.IncrementWrapStencilOp,
-    stencilZFail: THREE.IncrementWrapStencilOp,
-    stencilZPass: THREE.IncrementWrapStencilOp,
-  });
-
-  private backMaterial = new THREE.ShaderMaterial({
-    vertexShader: vertexShader,
-    fragmentShader: fragmentShader,
-    side: THREE.BackSide,
-    clippingPlanes: [],
-    clipping: true,
-    colorWrite: false,
-    depthWrite: false,
-    stencilWrite: true,
-    stencilFail: THREE.DecrementWrapStencilOp,
-    stencilZFail: THREE.DecrementWrapStencilOp,
-    stencilZPass: THREE.DecrementWrapStencilOp,
-  });
-
-  public capMaterial = new THREE.ShaderMaterial({
-    vertexShader: standartMeshMaterialVertex,
-    fragmentShader: standartMeshMaterialFragment,
-    uniforms: {
-      u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-      clippingPlane: { value: null },
-      hasLines: { value: 1. }
-    },
-    side: THREE.DoubleSide,
-    stencilWrite: true,
-    stencilFunc: THREE.NotEqualCompare,
-    stencilFail: THREE.ZeroStencilOp,
-    stencilZFail: THREE.ZeroStencilOp,
-    stencilZPass: THREE.ZeroStencilOp,
-  });
-
   init(clippingPlane: THREE.Plane) {
     this.clippingPlane = clippingPlane
-
-    this.backMaterial.clippingPlanes?.push(this.clippingPlane)
-    this.frontMaterial.clippingPlanes?.push(this.clippingPlane)
   }
 
-  getGeometryBVH(geometry: THREE.Mesh) {
+  getGeometryBVH(geometry: THREE.Mesh, capPlane: THREE.PlaneGeometry) {
     if (!this.clippingPlane) throw Error('no clipping plane')
+
+
+    const frontMaterial = new THREE.ShaderMaterial({
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader,
+      side: THREE.FrontSide,
+      clippingPlanes: [this.clippingPlane],
+      clipping: true,
+      stencilWrite: true,
+      stencilFail: THREE.IncrementWrapStencilOp,
+      stencilZFail: THREE.IncrementWrapStencilOp,
+      stencilZPass: THREE.IncrementWrapStencilOp,
+    });
+
+    const backMaterial = new THREE.ShaderMaterial({
+      vertexShader: vertexShader,
+      fragmentShader: fragmentShader,
+      side: THREE.BackSide,
+      clippingPlanes: [this.clippingPlane],
+      clipping: true,
+      stencilWrite: true,
+      stencilFail: THREE.DecrementWrapStencilOp,
+      stencilZFail: THREE.DecrementWrapStencilOp,
+      stencilZPass: THREE.DecrementWrapStencilOp,
+    });
+
+    const cap = new THREE.Mesh(capPlane)
+    let measure = new THREE.Vector3();
+    let box = new THREE.Box3().setFromObject(cap).getSize(measure);
+
+    const capMaterial = new THREE.ShaderMaterial({
+      vertexShader: standartMeshMaterialVertex,
+      fragmentShader: standartMeshMaterialFragment,
+      uniforms: {
+        u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+        clippingPlane: { value: null },
+        objectSize: { value: new THREE.Vector2(measure.x, measure.y) },  // Will be updated based on mesh size
+        lineWidth: { value: 0.05 },                      // Width of the lines
+        lineAngle: { value: Math.PI / 4 },
+        hasLines: { value: 1. }
+      },
+      side: THREE.DoubleSide,
+      stencilWrite: true,
+      stencilFunc: THREE.NotEqualCompare,
+      stencilFail: THREE.ZeroStencilOp,
+      stencilZFail: THREE.ZeroStencilOp,
+      stencilZPass: THREE.ZeroStencilOp,
+    });
 
     const front = new THREE.Mesh;
     front.copy(geometry)
-    front.material = this.frontMaterial
+    front.material = frontMaterial
 
     const back = new THREE.Mesh;
     back.copy(geometry)
-    back.material = this.backMaterial
+    back.material = backMaterial
+
+    cap.material = capMaterial
 
     const finalGeom: stencilGeometry = {
       front: front,
       back: back,
+      cap: cap
     }
 
     return finalGeom
