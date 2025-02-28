@@ -10,6 +10,7 @@ import { BVHGeomTest } from '../service/BVHGeomTest.service';
 import { BVHGeometryService } from '../service/BVHGeometry.service';
 import { ModelLoaderService } from '../service/modelLoader.service';
 import CameraControls from 'camera-controls';
+import { checker } from 'three/webgpu';
 @Component({
   selector: 'app-engine',
   standalone: true,
@@ -158,8 +159,7 @@ export class EngineComponent implements AfterViewInit {
 
   protected prepareControls() {
     // https://threejs.org/docs/#examples/en/controls/OrbitControls.update
-    // this.controls = new OrbitControls(this.camera, this.renderer.domElement)
-    // this.controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.ROTATE, RIGHT: THREE.MOUSE.DOLLY }
+    // https://github.com/yomotsu/camera-controls
 
     this.controls = new CameraControls(this.camera, this.renderer.domElement);
 
@@ -194,7 +194,8 @@ export class EngineComponent implements AfterViewInit {
 
   async prepareGeometry() {
     await this.geometryService.initGeometry().then(() => {
-      this.geometryService.geometry().traverse(geometry => {
+      console.log(this.geometryService.stencilGeometry())
+      this.geometryService.stencilGeometry().traverse(geometry => {
         this.recursiveGeometryAdding(geometry)
       })
     })
@@ -210,8 +211,8 @@ export class EngineComponent implements AfterViewInit {
   recursiveGeometryAdding(geometry: THREE.Object3D) {
     let geomBVH;
     if (geometry instanceof THREE.Mesh) {
-      geomBVH = this.bvhGeometryService.getGeometryBVH(geometry)
-      this.scene.add(geomBVH.front, geomBVH.back)
+      // geomBVH = this.bvhGeometryService.getGeometryBVH(geometry)
+      this.scene.add(geometry)
     } else if (geometry instanceof THREE.Group) {
       geometry.children.forEach(subGeometry => {
         this.recursiveGeometryAdding(subGeometry)
