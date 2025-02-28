@@ -6,7 +6,7 @@ import vertexShader from '../shaders/slicerShader/vertexShader.glsl'
 import fragmentShader from '../shaders/slicerShader/fragmentShader.glsl'
 import { SlicerService } from '../../slicer/service/slicer.service';
 
-class BVHGeom {
+export class stencilGeometry {
   front: THREE.Mesh;
   back: THREE.Mesh;
 }
@@ -19,26 +19,29 @@ export class BVHGeometryService {
 
   slicerService = inject(SlicerService)
 
-  bvhGeometrie: BVHGeom[] = []
 
   private clippingPlane: THREE.Plane;
   frontModel: THREE.Mesh;
   backModel: THREE.Mesh;
 
-  private frontMaterial = new THREE.MeshStandardMaterial({
-    color: 0x0000ff,
+  private frontMaterial = new THREE.ShaderMaterial({
+    vertexShader: vertexShader,
+    fragmentShader: fragmentShader,
     side: THREE.FrontSide,
     clippingPlanes: [],
+    clipping: true,
     stencilWrite: true,
     stencilFail: THREE.IncrementWrapStencilOp,
     stencilZFail: THREE.IncrementWrapStencilOp,
     stencilZPass: THREE.IncrementWrapStencilOp,
   });
 
-  private backMaterial = new THREE.MeshStandardMaterial({
-    color: 0x00ff00,
+  private backMaterial = new THREE.ShaderMaterial({
+    vertexShader: vertexShader,
+    fragmentShader: fragmentShader,
     side: THREE.BackSide,
     clippingPlanes: [],
+    clipping: true,
     colorWrite: false,
     depthWrite: false,
     stencilWrite: true,
@@ -81,7 +84,7 @@ export class BVHGeometryService {
     back.copy(geometry)
     back.material = this.backMaterial
 
-    const finalGeom: BVHGeom = {
+    const finalGeom: stencilGeometry = {
       front: front,
       back: back,
     }
