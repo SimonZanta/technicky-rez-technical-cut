@@ -1,14 +1,12 @@
 import { AfterViewInit, Component, ElementRef, inject, NgZone, viewChild } from '@angular/core';
 import * as THREE from 'three';
 import WebGL from 'three/addons/capabilities/WebGL.js';
-import { GeometryCompressionUtils, MapControls, OrbitControls } from 'three/examples/jsm/Addons.js';
 import { CameraService } from '../../../core/services/camera.service';
 import { GeometryService } from '../service/geometry.service';
 import { MaterialService } from '../service/material.service';
 import { SlicerService } from "../../slicer/service/slicer.service";
 import { BVHGeomTest } from '../service/BVHGeomTest.service';
-import { BVHGeometryService } from '../service/BVHGeometry.service';
-import { ModelLoaderService } from '../service/modelLoader.service';
+import { BVHGeometryService } from '../service/capGeometry.service';
 import CameraControls from 'camera-controls';
 @Component({
   selector: 'app-engine',
@@ -158,8 +156,7 @@ export class EngineComponent implements AfterViewInit {
 
   protected prepareControls() {
     // https://threejs.org/docs/#examples/en/controls/OrbitControls.update
-    // this.controls = new OrbitControls(this.camera, this.renderer.domElement)
-    // this.controls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.ROTATE, RIGHT: THREE.MOUSE.DOLLY }
+    // https://github.com/yomotsu/camera-controls
 
     this.controls = new CameraControls(this.camera, this.renderer.domElement);
 
@@ -194,12 +191,12 @@ export class EngineComponent implements AfterViewInit {
 
   async prepareGeometry() {
     await this.geometryService.initGeometry().then(() => {
-      this.geometryService.geometry().traverse(geometry => {
+      this.geometryService.stencilGeometry().traverse(geometry => {
         this.recursiveGeometryAdding(geometry)
       })
     })
 
-    this.geometryService.slicerGeometries.forEach(slicer => {
+    this.geometryService.slicerGeometries().forEach(slicer => {
       this.scene.add(slicer)
     })
 
@@ -210,8 +207,7 @@ export class EngineComponent implements AfterViewInit {
   recursiveGeometryAdding(geometry: THREE.Object3D) {
     let geomBVH;
     if (geometry instanceof THREE.Mesh) {
-      geomBVH = this.bvhGeometryService.getGeometryBVH(geometry)
-      this.scene.add(geomBVH.front, geomBVH.back)
+      this.scene.add(geometry)
     } else if (geometry instanceof THREE.Group) {
       geometry.children.forEach(subGeometry => {
         this.recursiveGeometryAdding(subGeometry)

@@ -39,11 +39,16 @@ export class SlicerService {
     return plane
   }
 
-  getSlicerAsVector(plane?: THREE.Plane): THREE.Vector4 {
+  getSlicerAsVector(plane?: THREE.Plane): THREE.Vector3 {
     const currentPlane = plane ?? this.slicerPlane
 
     if (!currentPlane) throw Error('no plane to return as vector')
 
-    return new THREE.Vector4(currentPlane.normal.x, currentPlane.normal.y, currentPlane.normal.z, currentPlane.constant)
+    return new THREE.Vector3(currentPlane.normal.x, currentPlane.normal.y, currentPlane.normal.z)
+  }
+
+  setPositionFromSlicer(object: THREE.Mesh) {
+    const planePosition = this.getSlicerAsVector()
+    object.position.set(planePosition.x, planePosition.y, planePosition.z)
   }
 }

@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { BufferGeometry } from 'three';
 import { SlicerService } from '../../slicer/service/slicer.service';
 import { MaterialService } from './material.service';
-import { BVHGeometryService, stencilGeometry } from './BVHGeometry.service';
+import { BVHGeometryService, stencilGeometry } from './capGeometry.service';
 import { ModelLoaderService } from './modelLoader.service';
 
 class stencilGeometryGroup {
@@ -20,63 +20,73 @@ export class GeometryService {
   modelLoaderService = inject(ModelLoaderService)
 
   public readonly geometry = signal<THREE.Group>(new THREE.Group());
-  public readonly stencilGeometry = signal<stencilGeometryGroup | null>(null);
-  public readonly slicerGeometries: THREE.Mesh[] = [];
+  public readonly stencilGeometry = signal<THREE.Group>(new THREE.Group);
+
+  public readonly slicerGeometries = signal<THREE.Mesh[]>([]);
+  public readonly slicerPosition = signal<THREE.Vector3>(new THREE.Vector3(0, 0, 0));
 
   async initGeometry() {
     //plane refactor
-    this.createSlicerGeometry(new THREE.PlaneGeometry(1200, 1200))
-
-
     this.materialService.initMaterial(new THREE.Vector4(0, 0, 1, 0))
+
     // this.createObjectGeometry(new THREE.SphereGeometry(1))
     // this.createObjectGeometry(new THREE.BoxGeometry(1, 1, 1))
+
     await this.modelLoaderService.loadOBJModel('assets/models/robotical-arm.obj').then((object) => {
       const tempGroup = new THREE.Group()
       tempGroup.add(object)
       this.geometry().add(tempGroup);
     })
 
-    this.getStencilBufferedGeometryFromObject(this.geometry())
+    this.stencilGeometry.set(this.getStencilBufferedGeometryFromObject(this.geometry()))
   }
 
   getStencilBufferedGeometryFromObject(geometry: THREE.Group) {
-    const group: THREE.Group = new THREE.Group
-    group.name = geometry.name
-
+    const group: THREE.Group = new THREE.Group();
+    group.name = geometry.name;
 
     geometry.children.forEach(object => {
-
-      const tempGroup = new THREE.Group
-      const geometryGroup = this.recursiveGeometryAdding(object)
-
-      console.log(geometryGroup)
-
+      const geometryGroup = this.recursiveGeometryAdding(object);
       if (geometryGroup) {
-        tempGroup.add(geometryGroup)
-        group.add(tempGroup)
+        group.add(geometryGroup);
       }
-    })
-    return group
+    });
+
+    return group;
   }
 
   recursiveGeometryAdding(geometry: THREE.Object3D) {
-    const group = new THREE.Group
-    group.name = geometry.name
+    const group = new THREE.Group();
+    group.name = geometry.name;
 
     if (geometry instanceof THREE.Mesh) {
-      const geometryBVH: stencilGeometry = this.bvhGeometryService.getGeometryBVH(geometry)
-      group.add(geometryBVH.front, geometryBVH.back)
+      // create plane geometry
+      const objBoundingBox = new THREE.Box3().setFromObject(geometry);
+
+      const plane = this.getSlicerPlaneGeometryFromMesh(objBoundingBox)
+      const geometryBVH: stencilGeometry = this.bvhGeometryService.getGeometryBVH(geometry, plane);
+
+      const cap = geometryBVH.cap
+
+      const boundingPosition = objBoundingBox.getCenter(new THREE.Vector3())
+      const planeZ = this.slicerService.getSlicerAsVector().z
+
+      cap.position.set(boundingPosition.x, boundingPosition.y, 0)
+
+      group.add(geometryBVH.front, geometryBVH.back);
+      this.slicerGeometries().push(cap)
+
     } else if (geometry instanceof THREE.Group) {
-      const group = new stencilGeometryGroup()
-      group.groupName = geometry.name
       geometry.children.forEach(subGeometry => {
-        this.recursiveGeometryAdding(subGeometry)
+        const childGroup = this.recursiveGeometryAdding(subGeometry);
+        if (childGroup) {
+          group.add(childGroup);
+        }
       });
     }
-    if (group.children.length == 0) return null
 
-    return group
+    if (group.children.length === 0) return null;
+    return group;
   }
 
   createObjectGeometry(object: BufferGeometry) {
@@ -84,23 +94,23 @@ export class GeometryService {
     this.geometry().add(geometry);
   }
 
-  createSlicerGeometry(object: BufferGeometry) {
-    const geometry = object;
+  getSlicerPlaneGeometryFromMesh(object: THREE.Box3) {
+    const boundingBox = object
+    const boundingSize = boundingBox.getSize(new THREE.Vector3())
 
-    const material = this.bvhGeometryService.capMaterial
+    const tempBoundingWidth = boundingSize.x;
+    const tempBoundingHeight = boundingSize.y;
 
-
-    const mesh = new THREE.Mesh(geometry, material);
-
-    this.slicerGeometries.push(mesh);
+    return new THREE.PlaneGeometry(tempBoundingWidth, tempBoundingHeight)
   }
 
   updateSlicerPosition(position: THREE.Vector3) {
-    const slicer = this.slicerGeometries.at(0);
     const slicerPlane = this.slicerService.slicerPlane
-    if (slicer && slicerPlane) {
-      slicer.position.set(position.x, position.y, position.z);
-      this.slicerService.setSlicerPlanePosition(slicerPlane, position)
-    }
+
+    this.slicerGeometries().forEach(slicer => {
+      slicer.position.set(slicer.position.x, slicer.position.y, position.z);
+    })
+
+    this.slicerService.setSlicerPlanePosition(slicerPlane, position)
   }
 }

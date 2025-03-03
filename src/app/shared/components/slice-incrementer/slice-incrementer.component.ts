@@ -19,7 +19,7 @@ export class SliceIncrementerComponent {
 
 
   updateSlice(event: any) {
-    const oldPos = this.geometryService.slicerGeometries.at(0)?.position;
+    const oldPos = this.geometryService.slicerPosition();
     let newPos: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
     if (oldPos) {
       if (this.lastPos() < event.target.valueAsNumber) {
