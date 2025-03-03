@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { BufferGeometry } from 'three';
 import { SlicerService } from '../../slicer/service/slicer.service';
 import { MaterialService } from './material.service';
-import { BVHGeometryService, stencilGeometry } from './BVHGeometry.service';
+import { BVHGeometryService, stencilGeometry } from './capGeometry.service';
 import { ModelLoaderService } from './modelLoader.service';
 
 class stencilGeometryGroup {
@@ -21,7 +21,9 @@ export class GeometryService {
 
   public readonly geometry = signal<THREE.Group>(new THREE.Group());
   public readonly stencilGeometry = signal<THREE.Group>(new THREE.Group);
-  public readonly slicerGeometries: THREE.Mesh[] = [];
+
+  public readonly slicerGeometries = signal<THREE.Mesh[]>([]);
+  public readonly slicerPosition = signal<THREE.Vector3>(new THREE.Vector3(0, 0, 0));
 
   async initGeometry() {
     //plane refactor
@@ -72,7 +74,7 @@ export class GeometryService {
       cap.position.set(boundingPosition.x, boundingPosition.y, 0)
 
       group.add(geometryBVH.front, geometryBVH.back);
-      this.slicerGeometries.push(cap)
+      this.slicerGeometries().push(cap)
 
     } else if (geometry instanceof THREE.Group) {
       geometry.children.forEach(subGeometry => {
@@ -105,7 +107,7 @@ export class GeometryService {
   updateSlicerPosition(position: THREE.Vector3) {
     const slicerPlane = this.slicerService.slicerPlane
 
-    this.slicerGeometries.forEach(slicer => {
+    this.slicerGeometries().forEach(slicer => {
       slicer.position.set(slicer.position.x, slicer.position.y, position.z);
     })
 

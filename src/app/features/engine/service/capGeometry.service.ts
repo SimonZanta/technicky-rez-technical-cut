@@ -67,8 +67,8 @@ export class BVHGeometryService {
       uniforms: {
         u_resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
         clippingPlane: { value: null },
-        objectSize: { value: new THREE.Vector2(measure.x, measure.y) },  // Will be updated based on mesh size
-        lineWidth: { value: 0.05 },                      // Width of the lines
+        objectSize: { value: new THREE.Vector2(measure.x, measure.y) },
+        lineWidth: { value: 0.05 },
         lineAngle: { value: Math.PI / 4 },
         hasLines: { value: 1. }
       },

@@ -6,7 +6,7 @@ import { GeometryService } from '../service/geometry.service';
 import { MaterialService } from '../service/material.service';
 import { SlicerService } from "../../slicer/service/slicer.service";
 import { BVHGeomTest } from '../service/BVHGeomTest.service';
-import { BVHGeometryService } from '../service/BVHGeometry.service';
+import { BVHGeometryService } from '../service/capGeometry.service';
 import CameraControls from 'camera-controls';
 @Component({
   selector: 'app-engine',
@@ -196,7 +196,7 @@ export class EngineComponent implements AfterViewInit {
       })
     })
 
-    this.geometryService.slicerGeometries.forEach(slicer => {
+    this.geometryService.slicerGeometries().forEach(slicer => {
       this.scene.add(slicer)
     })
 
