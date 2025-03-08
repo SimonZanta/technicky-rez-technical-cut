@@ -1,0 +1,27 @@
+.mat-mdc-slider {
+    --mdc-slider-handle-color: #FF8C00;
+    --mdc-slider-focus-handle-color: #FF8C00;
+    --mdc-slider-hover-handle-color: #FF8C00;
+    --mdc-slider-active-track-color: #FF8C00;
+    --mdc-slider-label-label-text-color: #FF8C00;
+    --mdc-slider-inactive-track-color: #454C5A;
+    --mdc-slider-handle-shape: 10px;
+    --mdc-slider-handle-width: 10px;
+    --mdc-slider-handle-height: 10px;
+    --slider-value-indicator-container-left: 15px;
+    --mdc-slider-label-label-text-font: 'Open Sans';
+    --mdc-slider-inactive-track-height: 5px;
+}
+
+.wrapper {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+}
+
+mat-icon {
+    color: #454C5A;
+    transform: scale(0.8);
+    margin-right: 16px;
+}

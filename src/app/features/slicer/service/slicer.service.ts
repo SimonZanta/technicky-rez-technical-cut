@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import * as THREE from 'three';
 
 @Injectable({
@@ -9,6 +9,7 @@ export class SlicerService {
   // slicing is showed in docs\slicing_using_fragment_shader_GPT.md
 
   public slicerPlane: THREE.Plane
+  public sliceIncrementerValues = signal<{ min: number, max: number }>({ min: -1, max: 1 })
 
   initSlicerPlanes() {
     this.slicerPlane = this.getSlicerPlane()
@@ -50,5 +51,10 @@ export class SlicerService {
   setPositionFromSlicer(object: THREE.Mesh) {
     const planePosition = this.getSlicerAsVector()
     object.position.set(planePosition.x, planePosition.y, planePosition.z)
+  }
+
+  setSliceIncrementer(objectWidth: number) {
+    const widthHalf = Math.round(objectWidth / 2)
+    this.sliceIncrementerValues.set({ min: -widthHalf, max: widthHalf })
   }
 }

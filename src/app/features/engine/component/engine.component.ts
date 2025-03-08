@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, inject, NgZone, viewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, inject, NgZone, signal, viewChild } from '@angular/core';
 import * as THREE from 'three';
 import WebGL from 'three/addons/capabilities/WebGL.js';
 import { CameraService } from '../../../core/services/camera.service';
@@ -6,7 +6,7 @@ import { GeometryService } from '../service/geometry.service';
 import { MaterialService } from '../service/material.service';
 import { SlicerService } from "../../slicer/service/slicer.service";
 import { BVHGeomTest } from '../service/BVHGeomTest.service';
-import { BVHGeometryService } from '../service/capGeometry.service';
+import { CapGeometryService } from '../service/capGeometry.service';
 import CameraControls from 'camera-controls';
 @Component({
   selector: 'app-engine',
@@ -22,7 +22,7 @@ export class EngineComponent implements AfterViewInit {
   materialService = inject(MaterialService)
   slicerService = inject(SlicerService)
   bvhGeomTest = inject(BVHGeomTest)
-  bvhGeometryService = inject(BVHGeometryService)
+  bvhGeometryService = inject(CapGeometryService)
 
   public mainCanvas = viewChild.required<ElementRef>('mainCanvas')
   public camera!: THREE.PerspectiveCamera | THREE.OrthographicCamera
@@ -76,14 +76,6 @@ export class EngineComponent implements AfterViewInit {
     const delta = this.clock.getDelta();
     this.controls.update(delta)
 
-    //  // Animate clip plane
-    //  const time = Date.now() * 0.001;
-    //  this.bvhGeomTest.updateClipPlane(
-    //      new THREE.Vector3(Math.sin(time), Math.cos(time), 0),
-    //      0
-    //  );
-
-
     this.renderer.localClippingEnabled = true;
     this.renderer.render(this.scene, this.camera);
   }
@@ -124,9 +116,6 @@ export class EngineComponent implements AfterViewInit {
     this.prepareGeometry().then(() => {
       this.fitObjectToCamera()
     })
-
-    // this.prepareTestBVH()
-    // this.prepareOBJLoader()
   }
 
   protected getCanvas() {
@@ -151,7 +140,7 @@ export class EngineComponent implements AfterViewInit {
 
   protected prepareScene() {
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x000000)
+    this.scene.background = new THREE.Color(0x2F343F)
   }
 
   protected prepareControls() {
@@ -250,6 +239,9 @@ export class EngineComponent implements AfterViewInit {
         boundingDepth = tempBoundingDepth;
       }
     })
+
+    // currently slicing on z axis
+    this.slicerService.setSliceIncrementer(boundingDepth)
 
     const distanceToFit = this.controls.getDistanceToFitBox(boundingWidth, boundingHeight, boundingDepth);
     this.controls.fitToBox(boundingBox, true);
