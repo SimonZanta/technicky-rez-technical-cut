@@ -14,7 +14,7 @@ export class stencilGeometry {
 @Injectable({
   providedIn: 'root'
 })
-export class BVHGeometryService {
+export class CapGeometryService {
   //https://github.com/gkjohnson/three-mesh-bvh/blob/master/example/clippedEdges.js
   //https://github.com/gkjohnson/three-mesh-bvh
 

@@ -15,11 +15,15 @@ varying vec2 vUv;
 void main() {
   #include <clipping_planes_fragment>
 
+  float greyScale = 0.8;
+
+  vec3 lightDir = normalize(vec3(0.0, 0.0, 1.0)); 
+
   if (gl_FrontFacing) { 
-    float fragDot = abs(dot(normalize(gl_FragCoord.xyz), vNormal));
-    gl_FragColor = vec4(vec3(0.0, 1.0, 0.0) * fragDot, 1.0);
+    float fragDot = abs(dot(lightDir, normalize(vNormal)));
+    gl_FragColor = vec4(vec3(greyScale) * fragDot, 1.0);
   }
   else { //back facing (creates illusion of full material)
-    gl_FragColor = vec4(vec3(0.0, 1.0, 0.0), 1.0);
+    gl_FragColor = vec4(vec3(greyScale), 1.0);
   }
 }

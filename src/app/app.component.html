@@ -1,2 +1,16 @@
-<app-slice-incrementer></app-slice-incrementer>
+@if(modelLoaderService.isLoading()){
+<div class="spinner">
+    <mat-progress-spinner [mode]="mode" [value]="modelLoaderService.loadingLevel()" [diameter]="150">
+    </mat-progress-spinner>
+    <div class="progress">
+        {{ modelLoaderService.loadingLevel() | appGetLoadingPercentLabel }}
+    </div>
+</div>
+} @else {
+<div class="wrapper">
+    <app-slice-incrementer [(min)]="slicerService.sliceIncrementerValues().min"
+        [(max)]="slicerService.sliceIncrementerValues().max"></app-slice-incrementer>
+</div>
+}
+
 <app-engine></app-engine>

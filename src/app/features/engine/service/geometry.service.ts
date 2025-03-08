@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { BufferGeometry } from 'three';
 import { SlicerService } from '../../slicer/service/slicer.service';
 import { MaterialService } from './material.service';
-import { BVHGeometryService, stencilGeometry } from './capGeometry.service';
+import { CapGeometryService, stencilGeometry } from './capGeometry.service';
 import { ModelLoaderService } from './modelLoader.service';
 
 class stencilGeometryGroup {
@@ -16,7 +16,7 @@ class stencilGeometryGroup {
 export class GeometryService {
   slicerService = inject(SlicerService);
   materialService = inject(MaterialService);
-  bvhGeometryService = inject(BVHGeometryService);
+  bvhGeometryService = inject(CapGeometryService);
   modelLoaderService = inject(ModelLoaderService)
 
   public readonly geometry = signal<THREE.Group>(new THREE.Group());
@@ -110,6 +110,8 @@ export class GeometryService {
     this.slicerGeometries().forEach(slicer => {
       slicer.position.set(slicer.position.x, slicer.position.y, position.z);
     })
+
+    this.slicerPosition.set(position)
 
     this.slicerService.setSlicerPlanePosition(slicerPlane, position)
   }
