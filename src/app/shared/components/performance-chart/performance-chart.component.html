@@ -1,0 +1,22 @@
+<div class="fps-container">
+    <div class="fps-stats">
+      <div class="stat-box">
+        <div class="stat-label">Current FPS:</div>
+        <div class="stat-value">{{ currentFps() }}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Min FPS:</div>
+        <div class="stat-value">{{ minFps() === INFINITY ? '-' : minFps() }}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Max FPS:</div>
+        <div class="stat-value">{{ maxFps() }}</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Avg FPS:</div>
+        <div class="stat-value">{{ avgFps() }}</div>
+      </div>
+    </div>
+    
+    <canvas #fpsCanvas class="fps-canvas"></canvas>
+  </div>

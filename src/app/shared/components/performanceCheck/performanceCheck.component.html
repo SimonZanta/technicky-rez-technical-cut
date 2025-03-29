@@ -1,0 +1,3 @@
+<button mat-button (click)="performance.performanceRunning.set(!performance.performanceRunning())">{{performance.performanceRunning() ? 'stop' : 'start'}}</button>
+<button mat-button (click)="exportFps()">export</button>
+<app-performance-chart></app-performance-chart>
