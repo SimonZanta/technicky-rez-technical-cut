@@ -8,10 +8,20 @@
 </div>
 } @else {
 <div class="wrapper">
-    <app-slice-incrementer [(min)]="slicerService.sliceIncrementerValues().min"
-        [(max)]="slicerService.sliceIncrementerValues().max"></app-slice-incrementer>
-</div>
-<app-performance-check></app-performance-check>
+    <app-extend-tab [label]="'slice mover'">
+        <ng-container content>
+            <app-slice-incrementer [(min)]="slicerService.sliceIncrementerValues().min"
+                [(max)]="slicerService.sliceIncrementerValues().max"></app-slice-incrementer>
+        </ng-container>
+        </app-extend-tab>
+        <div class="performance-wrapper">
+            <app-extend-tab [label]="'performance'">
+                <ng-container content>
+                    <app-performance-check></app-performance-check>
+        </ng-container>
+        </app-extend-tab>
+        </div>
+        </div>
 }
 
 <app-engine></app-engine>

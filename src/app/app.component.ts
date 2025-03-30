@@ -8,11 +8,12 @@ import { ModelLoaderService } from './features/engine/service/modelLoader.servic
 import { GetLoadingPercentLabelPipe } from "./shared/pipes/getLoadingPercentLabel.pipe";
 import { PerformanceCheckComponent } from "./shared/components/performanceCheck/performanceCheck.component";
 import { PerformanceChartComponent } from "./shared/components/performance-chart/performance-chart.component";
+import { ExtendTabComponent } from "./shared/components/extend-tab/extend-tab.component";
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, EngineComponent, SliceIncrementerComponent, MatProgressSpinnerModule, GetLoadingPercentLabelPipe, PerformanceCheckComponent, PerformanceChartComponent],
+  imports: [RouterOutlet, EngineComponent, SliceIncrementerComponent, MatProgressSpinnerModule, GetLoadingPercentLabelPipe, PerformanceCheckComponent, PerformanceChartComponent, ExtendTabComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

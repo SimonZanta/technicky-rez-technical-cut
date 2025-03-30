@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, effect, ElementRef, inject, signal, viewChild, ViewChild } from '@angular/core';
 import { PerformanceServiceService } from '../../../features/engine/service/performanceService.service';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton } from '@angular/material/button';
 
 @Component({
   selector: 'app-performance-chart',
   standalone: true,
-  imports: [],
+  imports: [MatIcon, MatIconButton],
   templateUrl: `./performance-chart.component.html`,
   styleUrl: './performance-chart.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,6 +27,8 @@ export class PerformanceChartComponent {
   public avgFps = signal<number>(0);
 
   chartIsLoaded = false
+
+  showOnlyStats = signal(true)
 
   public readonly INFINITY = Infinity;
   
@@ -80,7 +84,9 @@ export class PerformanceChartComponent {
     const height = canvas.height;
     
     // Clear canvas
-    ctx.fillStyle = '#3A404E';
+    ctx.clearRect(0, 0, width, height);
+
+    ctx.fillStyle = '#3A404E3F';
     ctx.fillRect(0, 0, width, height);
     
     if (this.fpsValues.length <= 1) return;

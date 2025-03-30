@@ -17,7 +17,7 @@
     "@angular/compiler": "^18.2.0",
     "@angular/core": "^18.2.0",
     "@angular/forms": "^18.2.0",
-    "@angular/material": "^17.0.0",
+    "@angular/material": "^17.3.10",
     "@angular/platform-browser": "^18.2.0",
     "@angular/platform-browser-dynamic": "^18.2.0",
     "@angular/router": "^18.2.0",
@@ -46,6 +46,7 @@
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
     "raw-loader": "^4.0.2",
+    "sass": "^1.86.0",
     "typescript": "~5.5.2",
     "typescript-eslint": "8.18.0"
   }

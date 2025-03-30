@@ -1,3 +1,21 @@
 :host {
   display: block;
 }
+
+.stats-wrapp {
+  display: flex;
+  gap: 16px;
+  flex-direction: column;
+  padding: 16px 0;
+}
+
+.stat-wrapp {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.fps-canvas {
+  width: 150;
+  height: 75px;
+}
