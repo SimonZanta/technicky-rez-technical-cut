@@ -15,7 +15,7 @@
         </ng-container>
         </app-extend-tab>
         <div class="performance-wrapper">
-            <app-extend-tab [label]="'performance'">
+            <app-extend-tab [(isExpanded)]="isPerformanceExpanded" [label]="'performance'">
                 <ng-container content>
                     <app-performance-check></app-performance-check>
         </ng-container>

@@ -23,4 +23,6 @@ export class AppComponent {
 
   title = 'technicky_rez';
   mode: ProgressSpinnerMode = 'determinate';
+
+  isPerformanceExpanded = signal(false)
 }
