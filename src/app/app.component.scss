@@ -1,14 +1,19 @@
 .wrapper {
+    width: 100%;
     position: absolute;
-    top: 64px;
-    left: 16px
+        padding: 16px;
+            display: flex;
+        
+            & .performance-wrapper {
+                position: absolute;
+                right: 16px;
+            }
 }
 
 .spinner {
     position: absolute;
     top: 40%;
     left: 45%;
-    color: #D4D8E1;
 
     & .progress {
         position: relative;
@@ -21,4 +26,9 @@
 
 .mat-mdc-progress-spinner {
     --mdc-circular-progress-active-indicator-color: #FF8C00;
+}
+@media only screen and (max-width: 400px) {
+    .spinner {
+        left: 30%;
+    }
 }

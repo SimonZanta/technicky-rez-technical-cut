@@ -1,0 +1,77 @@
+@use '@angular/material' as mat;
+@include mat.core();
+
+$dark-orange-palette: (
+  50: #fff5e6,
+  100: #ffe0b3,
+  200: #ffcc80,
+  300: #ffb74d,
+  400: #ffa726,
+  500: #ff8c00,
+  600: #fb8c00,
+  700: #f57c00,
+  800: #ef6c00,
+  900: #e65100,
+  A100: #ffd180,
+  A200: #ffab40,
+  A400: #ff9100,
+  A700: #ff6d00,
+  contrast: (50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: #2f343f,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: rgba(black, 0.87),
+    A400: rgba(black, 0.87),
+    A700: white)
+);
+
+$dark-slate-palette: (
+  50: #e8e9ea,
+  100: #c5c7cb,
+  200: #9ea2a9,
+  300: #777d86,
+  400: #5a616b,
+  500: #2f343f,
+  600: #2a2f39,
+  700: #232731,
+  800: #1d2129,
+  900: #12151b,
+  A100: #7a8396,
+  A200: #5a6377,
+  A400: #424859,
+  A700: #2f343f,
+  contrast: (50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: white,
+    A400: white,
+    A700: white)
+);
+
+$my-primary: mat.define-palette($dark-orange-palette, 500);
+$my-accent: mat.define-palette($dark-slate-palette);
+
+$theme: mat.define-dark-theme((color: (primary: $my-primary,
+        accent: $my-accent ),
+      typography: mat.define-typography-config(),
+      density: 0));
+
+
+.dark-theme {
+    @include mat.all-component-themes($theme);
+}

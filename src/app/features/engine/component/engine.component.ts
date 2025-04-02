@@ -8,14 +8,20 @@ import { SlicerService } from "../../slicer/service/slicer.service";
 import { BVHGeomTest } from '../service/BVHGeomTest.service';
 import { CapGeometryService } from '../service/capGeometry.service';
 import CameraControls from 'camera-controls';
+import Stats from 'three/examples/jsm/libs/stats.module.js';
+import { PerformanceCheckComponent } from '../../../shared/components/performanceCheck/performanceCheck.component';
+import { PerformanceServiceService } from '../service/performanceService.service';
 @Component({
   selector: 'app-engine',
   standalone: true,
   imports: [],
   templateUrl: './engine.component.html',
+  providers: [PerformanceCheckComponent]
 })
 export class EngineComponent implements AfterViewInit {
   // implemented using https://github.com/JohnnyDevNull/ng-three-template
+
+  performance = inject(PerformanceServiceService)
 
   cameraService = inject(CameraService)
   geometryService = inject(GeometryService)
@@ -34,6 +40,8 @@ export class EngineComponent implements AfterViewInit {
   private controls!: CameraControls
   private clock = new THREE.Clock();
   private frameId = 0
+
+  stats = new Stats();
 
   constructor(private ngZone: NgZone) {
   }
@@ -69,18 +77,21 @@ export class EngineComponent implements AfterViewInit {
   }
 
   public render(): void {
-    this.frameId = requestAnimationFrame(() => {
-      this.render();
-    });
+    this.performance.update()
 
     const delta = this.clock.getDelta();
     this.controls.update(delta)
 
     this.renderer.localClippingEnabled = true;
     this.renderer.render(this.scene, this.camera);
+
+    this.frameId = requestAnimationFrame(() => {
+      this.render();
+    });
   }
 
   protected initScene() {
+    // this.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
     CameraControls.install({ THREE: THREE });
 
     // set canvas

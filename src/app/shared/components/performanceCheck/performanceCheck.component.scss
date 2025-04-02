@@ -1,0 +1,16 @@
+@use '@angular/material' as mat;
+:host {
+  text-align: right;
+}
+
+.performance-buttons {
+  display: flex;
+  flex-direction: row;
+  flex-direction: row;
+  gap: 16px;
+  justify-content: flex-end;
+}
+
+button {
+  @include mat.button-density(-2);
+}

@@ -1,0 +1,20 @@
+<div class="stats-wrapp">
+  <div class="stat-wrapp">
+    <span>Current FPS:</span>
+    <span>{{ currentFps() }}</span>
+  </div>
+  <div class="stat-wrapp">
+    <span>Min FPS:</span>
+    <span>{{ minFps() === INFINITY ? '-' : minFps() }}</span>
+  </div>
+  <div class="stat-wrapp">
+    <span>Max FPS:</span>
+    <span>{{ maxFps() }}</span>
+  </div>
+  <div class="stat-wrapp">
+    <span>Avg FPS:</span>
+    <span>{{ avgFps() }}</span>
+  </div>
+  </div>
+
+    <canvas #fpsCanvas class="fps-canvas"></canvas>

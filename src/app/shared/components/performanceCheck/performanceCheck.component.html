@@ -1,0 +1,8 @@
+<div class="performance-buttons">
+    <button mat-flat-button color="primary"
+        (click)="performance.performanceRunning.set(!performance.performanceRunning())">{{performance.performanceRunning()
+        ?
+        'stop' : 'start'}}</button>
+    <button mat-flat-button color="primary" (click)="exportFps()">export</button>
+</div>
+<app-performance-chart></app-performance-chart>

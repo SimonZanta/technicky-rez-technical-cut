@@ -1,0 +1,9 @@
+<div class="wrapper">
+<button mat-icon-button (click)="isExpanded.set(!isExpanded())">
+    <mat-icon>{{isExpanded() ? 'expand_less' : 'expand_more'}}</mat-icon>
+</button>
+<span>{{label()}}</span>
+</div>
+<div [style.visibility]="isExpanded() ? 'visible' : 'hidden'">
+<ng-content select="[content]"></ng-content>
+</div>
