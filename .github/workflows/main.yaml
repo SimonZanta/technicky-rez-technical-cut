@@ -23,7 +23,7 @@ jobs:
 
       - name: Deploy to gh pages
         run: |
-          npx angular-cli-ghpages --dir=dist/technicky-rez-technical-cut
+          ng deploy --repo=https://github.com/SimonZanta/technicky-rez-technical-cut.git --base-href=/technicky-rez-technical-cut/ --name="SimonZanta" --email="simon.zanta@protonmail.com"
         env:
           CI: true
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
