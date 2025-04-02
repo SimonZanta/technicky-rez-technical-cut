@@ -2,29 +2,28 @@ name: Build and Deploy technical cut
 on:
   push:
     branches:
-      - main
+      - master
 jobs:
   build:
     runs-on: ubuntu-latest
-steps:
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      
+      - name: Adding Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 22
 
-    - name: Checkout Repository
-      uses: actions/checkout@v2
-    
-    - name: Adding Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: 22
+      - name: Install Dependencies
+        run: npm install
 
-    - name: Install Dependencies
-      run: npm install
+      - name: Build Angular App
+        run: npm run build
 
-    - name: Build Angular App
-      run: npm run build
-
-    - name: Deploy to gh pages
-      run: |
-        npx angular-cli-ghpages --dir=dist/technicky-rez-technical-cut
-      env:
-        CI: true
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Deploy to gh pages
+        run: |
+          npx angular-cli-ghpages --dir=dist/technicky-rez-technical-cut
+        env:
+          CI: true
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
