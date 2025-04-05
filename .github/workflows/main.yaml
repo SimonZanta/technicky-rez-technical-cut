@@ -20,10 +20,3 @@ jobs:
 
       - name: Build Angular App
         run: npm run build
-
-      - name: Deploy to gh pages
-        run: |
-          ng deploy --repo=https://github.com/SimonZanta/technicky-rez-technical-cut.git --base-href=/technicky-rez-technical-cut/ --name="SimonZanta" --email="simon.zanta@protonmail.com"
-        env:
-          CI: true
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
