@@ -1,6 +1,6 @@
 # Technical Cut Visualization with Three.js and Angular
 
-![Live Project](https://simonzanta.github.io/technicky-rez-technical-cut/)
+[Live Project](https://simonzanta.github.io/technicky-rez-technical-cut/)
 
 A 3D visualization tool for displaying technical cuts on models in real-time using Three.js and Angular, compliant with ISO CSN 128-3 standards.
 
