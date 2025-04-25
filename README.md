@@ -1,27 +1,54 @@
-# TechnickyRez
+# Technical Cut Visualization with Three.js and Angular
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.5.
+![Project Preview](https://via.placeholder.com/800x400?text=Technical+Cut+Visualization) <!-- Consider adding a real screenshot -->
 
-## Development server
+A 3D visualization tool for displaying technical cuts on models in real-time using Three.js and Angular, compliant with ISO CSN 128-3 standards.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## Key Features
 
-## Code scaffolding
+- 🎨 **Realtime Cut Visualization** using Three.js stencil buffer
+- 📐 **ISO CSN 128-3 Compliant** technical cut display
+- ⚡ **Angular-based** responsive UI
+- 🖥️ **Interactive 3D Model** manipulation
+- ✂️ **Precise Cutting Plane** controls
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Technologies Used
 
-## Build
+- [Three.js](https://threejs.org/) - 3D rendering library
+- [Angular](https://angular.io/) - Frontend framework
+- TypeScript - Type-safe JavaScript
+- WebGL - Hardware-accelerated graphics
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+## Installation
 
-## Running unit tests
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/SimonZanta/technicky-rez-technical-cut.git
+   ```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+2. Install dependencies:
+```bash
+npm install
+```
+3. Run the development server:
+```bash
+    ng serve
+```
+Open your browser at http://localhost:4200
+## Usage
 
-## Running end-to-end tests
+ - Load a 3D model (supported formats: .gltf, .obj, .stl)
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+ - Position the cutting plane using the interactive controls
 
-## Further help
+ - View the technical cut in real-time
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+ - Adjust visualization parameters as needed
+
+## Implementation Highlights
+
+ - Stencil Buffer Technique: For precise real-time cuts without modifying geometry
+
+ - Cut Surface Rendering: Compliant with ISO CSN 128-3 standards
+
+ - Responsive Controls: Intuitive UI for manipulating cutting planes
